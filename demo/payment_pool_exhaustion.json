@@ -1,0 +1,14 @@
+{
+  "_label": "SYNTHETIC TEST DATA - not real production telemetry",
+  "events": [
+    {"timestamp":"2026-11-05T09:00:05Z","service":"payment-api","environment":"production","severity":"warning","source":"prometheus","message":"p99 latency 2400ms exceeds SLO 800ms","metadata":{"latency_p99_ms":2400},"synthetic":true},
+    {"timestamp":"2026-11-05T09:00:40Z","service":"postgres-primary","environment":"production","severity":"warning","source":"prometheus","message":"connection pool utilization 96% (96/100)","metadata":{"pool_used":96,"pool_max":100},"synthetic":true},
+    {"timestamp":"2026-11-05T09:01:10Z","service":"payment-api","environment":"production","severity":"error","source":"app-log","message":"request timeout after 5000ms waiting for db connection req=a1b2c3d4e5f6","metadata":{"users_affected":1800,"availability_pct":93.5},"synthetic":true},
+    {"timestamp":"2026-11-05T09:01:35Z","service":"payment-api","environment":"production","severity":"error","source":"app-log","message":"request timeout after 5000ms waiting for db connection req=f6e5d4c3b2a1","metadata":{},"synthetic":true},
+    {"timestamp":"2026-11-05T09:02:20Z","service":"checkout-service","environment":"production","severity":"critical","source":"alertmanager","message":"upstream payment-api 504 rate 31%","metadata":{},"synthetic":true},
+    {"timestamp":"2026-11-05T09:18:00Z","service":"payment-api","environment":"production","severity":"error","source":"app-log","message":"request timeout after 5000ms waiting for db connection req=0a0b0c0d0e0f","metadata":{},"synthetic":true},
+    {"timestamp":"2026-11-05T14:30:00Z","service":"email-worker","environment":"production","severity":"warning","source":"app-log","message":"SMTP retry queue depth 120 for user bob@example.com","metadata":{},"synthetic":true}
+  ],
+  "dependencies": {"checkout-service": ["payment-api"], "payment-api": ["postgres-primary"]},
+  "critical_services": ["payment-api", "checkout-service"]
+}

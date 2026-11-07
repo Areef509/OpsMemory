@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpsMemory · Autonomous Incident Response & Continuous Memory</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #070b14;
+  --surface: #0d1527;
+  --surface-raised: #131f38;
+  --surface-border: #1e2e4f;
+  --line: #1e293b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-glow: rgba(56, 189, 248, 0.15);
+  --purple: #a855f7;
+  --purple-glow: rgba(168, 85, 247, 0.15);
+  --red: #f43f5e;
+  --red-bg: rgba(244, 63, 94, 0.12);
+  --amber: #f59e0b;
+  --amber-bg: rgba(245, 158, 11, 0.12);
+  --green: #10b981;
+  --green-bg: rgba(16, 185, 129, 0.12);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+}
+header {
+  padding: 14px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0284c7, #8b5cf6);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: white;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.3);
+}
+h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+.subtitle { color: var(--text-muted); font-size: 12px; }
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.provider-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  font-size: 11px;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.dot-amber { background: var(--amber); box-shadow: 0 0 6px var(--amber); }
+.dot-red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.dot-muted { background: var(--text-muted); }
+
+.toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+input, select, button {
+  font: inherit;
+  border-radius: 6px;
+  padding: 7px 11px;
+  border: 1px solid var(--surface-border);
+  background: var(--surface-raised);
+  color: var(--text);
+}
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+button {
+  cursor: pointer;
+  background: #172554;
+  border-color: #1e3a8a;
+  color: #93c5fd;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+button:hover:not(:disabled) {
+  background: #1e40af;
+  color: white;
+  border-color: #3b82f6;
+}
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.btn-primary {
+  background: #0284c7;
+  border-color: #0369a1;
+  color: white;
+}
+button.btn-primary:hover:not(:disabled) {
+  background: #0369a1;
+}
+button.btn-success {
+  background: #065f46;
+  border-color: #047857;
+  color: #a7f3d0;
+}
+button.btn-success:hover:not(:disabled) {
+  background: #047857;
+  color: white;
+}
+button.btn-danger {
+  background: #881337;
+  border-color: #9f1239;
+  color: #fecdd3;
+}
+button.btn-danger:hover:not(:disabled) {
+  background: #9f1239;
+  color: white;
+}
+
+main {
+  max-width: 1600px;
+  margin: auto;
+  padding: 18px 24px;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+}
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 0;
+}
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.incident-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+.incident-card {
+  width: 100%;
+  text-align: left;
+  display: block;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.incident-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.incident-card.active {
+  border-color: var(--accent);
+  background: #0f2240;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.incident-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.incident-card-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+}
+.pill {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.sev-1 { background: var(--red-bg); color: var(--red); border: 1px solid rgba(244, 63, 94, 0.3); }
+.sev-2 { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245, 158, 11, 0.3); }
+.sev-3 { background: rgba(234, 179, 8, 0.12); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.3); }
+.sev-4 { background: var(--green-bg); color: var(--green); border: 1px solid rgba(16, 185, 129, 0.3); }
+.state-open { background: #1e293b; color: #94a3b8; }
+.state-investigated { background: #1e3a8a; color: #93c5fd; }
+.state-remediation_pending { background: #78350f; color: #fde68a; }
+.state-resolved { background: #064e3b; color: #6ee7b7; }
+
+.section {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--surface-border);
+}
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.metric-box {
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
+.metric-value { font-size: 14px; font-weight: 600; }
+
+/* Memory highlight container */
+.memory-box {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(56, 189, 248, 0.05));
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 0 16px var(--purple-glow);
+}
+.memory-item {
+  background: var(--surface);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 8px;
+}
+.memory-tag {
+  background: rgba(168, 85, 247, 0.2);
+  color: #d8b4fe;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Hypothesis cards */
+.hypothesis-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.conf-bar-bg {
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  margin: 8px 0;
+  overflow: hidden;
+}
+.conf-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  border-radius: 3px;
+}
+
+/* Recommendation cards */
+.rec-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.timeline-event {
+  border-left: 2px solid var(--surface-border);
+  padding: 4px 0 14px 14px;
+  margin-left: 6px;
+  position: relative;
+}
+.timeline-event::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.timeline-time { font-size: 11px; color: var(--text-muted); }
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--text-muted);
+}
+pre {
+  background: #050811;
+  border: 1px solid var(--surface-border);
+  padding: 12px;
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  overflow-x: auto;
+  color: #cbd5e1;
+}
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+  header { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo-icon">Ω</div>
+    <div>
+      <h1>OpsMemory <span class="pill" style="background:#0284c7;color:white">Agentic IR</span></h1>
+      <div class="subtitle">Continuous Incident Memory (Hindsight) · Anti-Fabrication LLM (Groq) · Human-in-the-Loop</div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <div class="provider-badge" id="badgePostgres"><span class="dot dot-muted"></span> PostgreSQL</div>
+    <div class="provider-badge" id="badgeGroq"><span class="dot dot-muted"></span> Groq LLM</div>
+    <div class="provider-badge" id="badgeHindsight"><span class="dot dot-muted"></span> Hindsight Memory</div>
+    <div class="provider-badge" id="badgePrometheus"><span class="dot dot-muted"></span> Prometheus</div>
+  </div>
+
+  <div class="toolbar">
+    <input id="apiKey" type="password" autocomplete="off" placeholder="X-API-Key (e.g. alice:sre)" style="width:200px">
+    <button id="connectBtn" class="btn-primary">Connect</button>
+    <button id="demoBtn" title="Ingest simulated payment pool incident">Ingest Demo</button>
+    <button id="refreshBtn" disabled>Refresh</button>
+  </div>
+</header>
+
+<main>
+  <!-- Left Column: Incidents List -->
+  <section class="panel">
+    <div class="sidebar-header">
+      <div><strong>Recorded Incidents</strong> <span id="incidentCount" class="pill state-open">0</span></div>
+      <small id="lastUpdated" style="color:var(--text-muted)">Not connected</small>
+    </div>
+    <div style="margin-bottom:10px">
+      <input id="filterInput" type="text" placeholder="Filter incidents..." style="width:100%">
+    </div>
+    <div id="incidentsContainer" class="incident-list">
+      <div class="empty-state">Enter an API key to view recorded incidents.</div>
+    </div>
+  </section>
+
+  <!-- Right Column: Incident Workspace & Investigation -->
+  <section class="panel" id="detailPanel">
+    <div class="empty-state">Select an incident from the left queue to view root-cause analysis, recalled memories, and runbooks.</div>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+let key = '', incidents = [], selectedId = null, refreshInterval = null, adapters = [];
+
+async function api(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      'X-API-Key': key,
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  const data = await res.json().catch(() => ({ detail: res.statusText }));
+  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  return data;
+}
+
+function esc(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+async function updateProviders() {
+  try {
+    const diag = await api('/diagnostics/providers');
+    $('badgePostgres').innerHTML = `<span class="dot ${diag.database.status==='connected'?'dot-green':'dot-red'}"></span> PostgreSQL`;
+    $('badgeGroq').innerHTML = `<span class="dot ${diag.groq.connected?'dot-green':(diag.groq.configured?'dot-amber':'dot-muted')}"></span> Groq (${esc(diag.groq.model||'LLM')})`;
+    $('badgeHindsight').innerHTML = `<span class="dot ${diag.hindsight.connected?'dot-green':(diag.hindsight.configured?'dot-amber':'dot-muted')}"></span> Hindsight (${esc(diag.hindsight.bank_id||'bank')})`;
+    $('badgePrometheus').innerHTML = `<span class="dot ${diag.prometheus.configured?'dot-green':'dot-muted'}"></span> Prometheus`;
+  } catch (err) {
+    // Fall back to public /ready
+    try {
+      const ready = await fetch('/ready').then(r => r.json());
+      $('badgePostgres').innerHTML = `<span class="dot ${ready.postgres==='connected'?'dot-green':'dot-red'}"></span> PostgreSQL`;
+      $('badgeGroq').innerHTML = `<span class="dot ${ready.groq_configuration==='present'?'dot-amber':'dot-muted'}"></span> Groq`;
+      $('badgeHindsight').innerHTML = `<span class="dot ${ready.hindsight_configuration==='present'?'dot-amber':'dot-muted'}"></span> Hindsight`;
+    } catch (e) {}
+  }
+}
+
+async function loadAdapters() {
+  try {
+    adapters = await api('/adapters');
+  } catch (e) {
+    adapters = [{ name: 'demo-noop', simulated: true }];
+  }
+}
+
+function renderIncidentList() {
+  const container = $('incidentsContainer');
+  const filter = ($('filterInput').value || '').toLowerCase();
+  const filtered = incidents.filter(x => {
+    return x.id.toLowerCase().includes(filter) ||
+           (x.services || []).join(' ').toLowerCase().includes(filter) ||
+           (x.severity || '').toLowerCase().includes(filter);
+  });
+
+  $('incidentCount').textContent = incidents.length;
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-state">No incidents match the filter.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(inc => {
+    const active = selectedId === inc.id ? 'active' : '';
+    const sev = (inc.severity || 'SEV-4').toLowerCase();
+    const state = (inc.state || 'open').toLowerCase();
+    return `
+      <div class="incident-card ${active}" onclick="selectIncident('${esc(inc.id)}')">
+        <div class="incident-card-top">
+          <span class="incident-card-title">${esc(inc.id)}</span>
+          <span class="pill ${sev}">${esc(inc.severity || 'SEV-4')}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">
+          ${esc((inc.services || []).join(', ') || 'unknown')}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="pill state-${state}">${esc(inc.state || 'open')}</span>
+          <small style="color:var(--text-muted)">${inc.synthetic ? 'Synthetic' : 'Prod'}</small>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectIncident(id) {
+  selectedId = id;
+  renderIncidentList();
+  const inc = incidents.find(x => x.id === id);
+  if (inc) renderIncidentDetail(inc);
+}
+
+function renderIncidentDetail(inc) {
+  const p = $('detailPanel');
+  const inv = inc.investigation || {};
+  const hyp = inv.hypotheses || [];
+  const recs = inv.recommendations || [];
+  const memories = inv.memories_used || [];
+  const approvals = inc.approval_requests || inc.approvals || [];
+  const pm = inc.postmortem || {};
+  const ver = inc.verification || pm.verification || {};
+
+  const sevClass = (inc.severity || 'SEV-4').toLowerCase();
+  const stateClass = `state-${(inc.state || 'open').toLowerCase()}`;
+
+  p.innerHTML = `
+    <!-- Incident Header Banner -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <h2 style="margin:0;font-size:20px;font-weight:700">${esc(inc.id)}</h2>
+          <span class="pill ${sevClass}">${esc(inc.severity || 'Unknown')}</span>
+          <span class="pill ${stateClass}">${esc(inc.state || 'open')}</span>
+          <span class="pill" style="background:#1e293b;color:var(--text-muted)">${inc.synthetic ? 'Synthetic Fixture' : 'Production'}</span>
+        </div>
+        <div style="color:var(--text-muted);font-size:12px;margin-top:4px">
+          Services: <strong>${esc((inc.services || []).join(', '))}</strong>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <button id="investigateBtn" class="btn-primary" onclick="runInvestigation('${esc(inc.id)}')">
+          ${inv.summary ? 'Re-investigate' : 'Run Investigation'}
+        </button>
+        <button id="verifyBtn" class="btn-success" onclick="runVerification('${esc(inc.id)}')">
+          Verify Recovery (Admin)
+        </button>
+      </div>
+    </div>
+
+    <!-- Severity Explanation & Meta Grid -->
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="metric-box">
+        <div class="metric-label">Severity Score & Reasons</div>
+        <div class="metric-value">${esc(inc.severity_score ?? '—')} / 15</div>
+        <small style="color:var(--text-muted)">${esc((inc.severity_reasons || []).join('; ') || 'Standard classification')}</small>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">LLM Provider & Latency</div>
+        <div class="metric-value">${esc(inv.llm?.model || 'Groq LPU')}</div>
+        <small style="color:var(--text-muted)">Latency: ${inv.llm?.latency_s ? inv.llm.latency_s + 's' : '—'} · Total: ${inv.total_s ? inv.total_s + 's' : '—'}</small>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">Hindsight Continuous Memory</div>
+        <div class="metric-value">${memories.length} recalled item(s)</div>
+        <small style="color:var(--text-muted)">Status: ${inv.memory_error ? '<span style="color:var(--red)">' + esc(inv.memory_error) + '</span>' : 'Healthy'}</small>
+      </div>
+    </div>
+
+    <!-- Section 1: Hindsight Continuous Memory (Central & Visible) -->
+    <div class="memory-box">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong style="color:#d8b4fe;display:flex;align-items:center;gap:6px">
+          <span>🧠</span> Hindsight Historical Ground Truth (Recalled from Prior Verified Incidents)
+        </strong>
+        <span class="memory-tag">${memories.length} Memorie(s) Recalled</span>
+      </div>
+      <div style="font-size:11px;color:#cbd5e1;margin-top:4px">
+        Continuous memory bank recalls verified root causes and approved runbooks across restarts and incidents.
+      </div>
+      ${memories.length ? memories.map((m, idx) => `
+        <div class="memory-item">
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+            <span class="memory-tag">Memory #${idx}</span>
+            <small style="color:var(--text-muted)">Historical Evidence</small>
+          </div>
+          <div style="font-size:12px;color:#f1f5f9">${esc(m)}</div>
+        </div>
+      `).join('') : `
+        <div style="padding:10px 0;color:var(--text-muted);font-size:12px">
+          ${inv.memory_error ? `<span style="color:var(--red)">Recall error: ${esc(inv.memory_error)}</span>` : 'No prior similar verified incidents in memory bank yet.'}
+        </div>
+      `}
+    </div>
+
+    <!-- Section 2: AI Investigation & Validated Hypotheses (Groq) -->
+    <div class="section">
+      <div class="section-title"><span>🤖</span> AI Root-Cause Investigation & Anti-Fabrication Validation</div>
+      ${inv.summary ? `
+        <div style="background:var(--surface-raised);border-left:3px solid var(--accent);padding:10px 14px;border-radius:4px;margin-bottom:12px">
+          <strong>Summary:</strong> ${esc(inv.summary)}
+        </div>
+      ` : '<p style="color:var(--text-muted)">Click "Run Investigation" above to perform causal reasoning with Groq and Hindsight.</p>'}
+
+      ${hyp.length ? `
+        <div class="grid-2">
+          ${hyp.map(h => `
+            <div class="hypothesis-card">
+              <div style="display:flex;justify-content:space-between">
+                <strong>${esc(h.cause)}</strong>
+                <span class="pill" style="background:#1e3a8a;color:#93c5fd">${Math.round((h.confidence||0)*100)}% Conf</span>
+              </div>
+              <div class="conf-bar-bg">
+                <div class="conf-bar-fill" style="width:${Math.round((h.confidence||0)*100)}%"></div>
+              </div>
+              <div style="font-size:11px;color:var(--text-muted)">
+                Supporting Event IDs: ${esc((h.supporting_event_ids||[]).join(', ') || 'None')}
+              </div>
+              <div style="font-size:10px;color:var(--green);margin-top:4px">
+                ✓ Validated against candidate evidence (Status: hypothesis_only)
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      ${inv.dropped_hypotheses?.length ? `
+        <div style="margin-top:8px;font-size:11px;color:var(--red)">
+          <strong>Dropped Hypotheses (Anti-Fabrication):</strong>
+          ${inv.dropped_hypotheses.map(d => `${esc(d.cause)} (${esc(d.why)})`).join('; ')}
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- Section 3: Recommended Runbooks & Human Approval Gate -->
+    <div class="section">
+      <div class="section-title"><span>🛡️</span> Evidence-Backed Runbooks & Human-in-the-Loop Remediation</div>
+      ${recs.length ? recs.map((r, idx) => `
+        <div class="rec-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <strong style="font-size:14px">${esc(r.action)}</strong>
+            <div style="display:flex;gap:6px;align-items:center">
+              <span class="pill ${r.priority==='high'?'sev-1':(r.priority==='medium'?'sev-2':'sev-4')}">${esc(r.priority || 'medium')} Priority</span>
+              ${r.historical_memory_index !== null && r.historical_memory_index !== undefined ? `
+                <span class="memory-tag">Cites Recalled Memory #${r.historical_memory_index}</span>
+              ` : ''}
+            </div>
+          </div>
+          <p style="margin:4px 0 8px;font-size:12px;color:#cbd5e1">${esc(r.reason)}</p>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">
+            Risk: <strong>${esc(r.risk)}</strong> · Verification: <strong>${esc(r.verification)}</strong>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="font-size:11px;color:var(--text-muted)">Target Adapter:</label>
+            <select id="adapterSelect_${idx}">
+              ${adapters.map(ad => `<option value="${esc(ad.name)}">${esc(ad.name)} ${ad.simulated?'(simulated)':''}</option>`).join('')}
+            </select>
+            <button class="btn-primary" onclick="requestRemediation('${esc(inc.id)}', ${idx})">Request Approval</button>
+          </div>
+        </div>
+      `).join('') : '<p style="color:var(--text-muted)">No recommendations available. Run investigation first.</p>'}
+
+      <!-- Approvals and Execution Status -->
+      ${approvals.length ? `
+        <div style="margin-top:14px">
+          <strong>Approval Requests & Audit Trail:</strong>
+          <div style="margin-top:8px">
+            ${approvals.map(req => `
+              <div style="background:var(--surface-raised);border:1px solid var(--surface-border);border-radius:6px;padding:10px 14px;margin-bottom:8px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div>
+                    <strong>Action: ${esc(req.action)}</strong> (adapter: <code>${esc(req.adapter||'default')}</code>)
+                    <span class="pill state-${esc(req.state||'pending')}">${esc(req.state||'pending')}</span>
+                    ${req.simulated ? '<span class="pill" style="background:#1e293b;color:var(--text-muted)">Simulated</span>' : ''}
+                  </div>
+                  <div class="toolbar">
+                    ${req.state === 'pending' ? `
+                      <button class="btn-success" onclick="decideApproval('${esc(req.id)}', true)">Approve (SRE)</button>
+                      <button class="btn-danger" onclick="decideApproval('${esc(req.id)}', false)">Reject</button>
+                    ` : ''}
+                    ${req.state === 'approved' ? `
+                      <button class="btn-primary" onclick="executeRemediation('${esc(req.id)}')">Execute Remediation</button>
+                    ` : ''}
+                  </div>
+                </div>
+                ${req.result ? `<pre style="margin-top:8px">${esc(JSON.stringify(req.result, null, 2))}</pre>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- Section 4: Recovery Verification & Post-Mortem Retention -->
+    <div class="section">
+      <div class="section-title"><span>📊</span> Recovery Verification & Post-Mortem Retention</div>
+      <div class="grid-2">
+        <div class="metric-box">
+          <div class="metric-label">Recovery Verification Criteria</div>
+          <div class="metric-value">${ver.resolved ? '<span style="color:var(--green)">✓ Resolved</span>' : '<span style="color:var(--amber)">Pending / Unresolved</span>'}</div>
+          <small style="color:var(--text-muted)">Reason: ${esc(ver.reason || 'Not yet verified')}</small>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Hindsight Memory Retention</div>
+          <div class="metric-value">${pm.retain_to_hindsight ? '<span style="color:var(--green)">✓ Retained to Hindsight</span>' : '<span style="color:var(--text-muted)">Gated (requires verified recovery)</span>'}</div>
+          <small style="color:var(--text-muted)">Root cause status: <strong>${esc(pm.root_cause?.status || 'unverified_hypothesis')}</strong></small>
+        </div>
+      </div>
+      ${pm.root_cause ? `
+        <div style="margin-top:12px;background:var(--surface-raised);border:1px solid var(--surface-border);border-radius:6px;padding:12px">
+          <strong>Confirmed Root Cause:</strong> ${esc(pm.root_cause.text)}<br>
+          <small style="color:var(--text-muted)">Status: ${esc(pm.root_cause.status)} · Resolutions executed: ${esc((pm.resolution||[]).map(r=>r.action).join(', ')||'None')}</small>
+        </div>
+      ` : ''}
+    </div>
+
+    <!-- Section 5: Chronological Event Timeline -->
+    <div class="section">
+      <div class="section-title"><span>🕒</span> Correlated Event Timeline (${(inc.timeline||[]).length} events)</div>
+      <div style="max-height:300px;overflow-y:auto;padding-right:8px">
+        ${(inc.timeline || []).map(e => `
+          <div class="timeline-event">
+            <div class="timeline-time">${esc(e.t)} · <span class="pill ${esc((e.severity||'').toLowerCase())}">${esc(e.severity)}</span> <strong>${esc(e.service)}</strong></div>
+            <div style="font-size:12px;margin:2px 0">${esc(e.message)}</div>
+            <small style="color:var(--text-muted)">ID: ${esc(e.event_id)} · Source: ${esc(e.source||'collector')}</small>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+async function refresh() {
+  try {
+    incidents = await api('/incidents');
+    $('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    renderIncidentList();
+    if (selectedId && incidents.some(x => x.id === selectedId)) {
+      const refreshed = await api(`/incidents/${encodeURIComponent(selectedId)}`);
+      renderIncidentDetail(refreshed);
+    } else if (incidents.length && !selectedId) {
+      selectIncident(incidents[0].id);
+    }
+    updateProviders();
+  } catch (err) {
+    $('lastUpdated').textContent = 'Refresh failed';
+    $('incidentsContainer').innerHTML = `<div class="empty-state" style="color:var(--red)">${esc(err.message)}</div>`;
+  }
+}
+
+async function runInvestigation(iid) {
+  const btn = $('investigateBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Investigating...'; }
+  try {
+    await api(`/incidents/${encodeURIComponent(iid)}/investigate?use_memory=true`, { method: 'POST' });
+    await refresh();
+  } catch (err) {
+    alert('Investigation error: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+async function requestRemediation(iid, recIndex) {
+  const select = $(`adapterSelect_${recIndex}`);
+  const adapter = select ? select.value : 'demo-noop';
+  try {
+    await api(`/incidents/${encodeURIComponent(iid)}/remediations`, {
+      method: 'POST',
+      body: JSON.stringify({ recommendation_index: recIndex, adapter: adapter })
+    });
+    await refresh();
+  } catch (err) {
+    alert('Remediation request error: ' + err.message);
+  }
+}
+
+async function decideApproval(rid, approve) {
+  const reason = prompt(approve ? 'Approval reason (optional):' : 'Rejection reason:');
+  if (reason === null) return;
+  try {
+    await api(`/approvals/${encodeURIComponent(rid)}/decision`, {
+      method: 'POST',
+      body: JSON.stringify({ approve: approve, reason: reason })
+    });
+    await refresh();
+  } catch (err) {
+    alert('Decision error: ' + err.message);
+  }
+}
+
+async function executeRemediation(rid) {
+  if (!confirm('Execute approved remediation adapter?')) return;
+  try {
+    await api(`/approvals/${encodeURIComponent(rid)}/execute`, { method: 'POST' });
+    await refresh();
+  } catch (err) {
+    alert('Execution error: ' + err.message);
+  }
+}
+
+async function runVerification(iid) {
+  try {
+    const res = await api(`/incidents/${encodeURIComponent(iid)}/verify`, { method: 'POST' });
+    alert('Recovery verification completed: ' + (res.postmortem?.verification?.reason || 'Done'));
+    await refresh();
+  } catch (err) {
+    alert('Verification error: ' + err.message);
+  }
+}
+
+async function injectDemo() {
+  const btn = $('demoBtn');
+  btn.disabled = true;
+  try {
+    const demoPayload = {
+      events: [
+        {
+          timestamp: new Date().toISOString(),
+          service: "postgres-pool",
+          environment: "prod",
+          severity: "critical",
+          source: "db-monitor",
+          message: "database connection pool exhausted: 100/100 connections active, 48 waiting",
+          metadata: { pool_size: 100, waiting: 48, users_affected: 2500 }
+        },
+        {
+          timestamp: new Date().toISOString(),
+          service: "payment-service",
+          environment: "prod",
+          severity: "error",
+          source: "app-server",
+          message: "checkout payment failed: connection acquisition timeout after 5000ms",
+          metadata: { error_code: "PG_ACQUIRE_TIMEOUT" }
+        },
+        {
+          timestamp: new Date().toISOString(),
+          service: "checkout-service",
+          environment: "prod",
+          severity: "warning",
+          source: "api-gateway",
+          message: "checkout response latency spike: p99 exceeds 4800ms on /pay endpoint",
+          metadata: { p99_latency_ms: 4800 }
+        }
+      ]
+    };
+    const res = await api('/events', { method: 'POST', body: JSON.stringify(demoPayload) });
+    alert('Demo incident ingested successfully: ' + (res.incident_ids || []).join(', '));
+    await refresh();
+    if (res.incident_ids?.length) {
+      selectIncident(res.incident_ids[0]);
+    }
+  } catch (err) {
+    alert('Failed to inject demo: ' + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+$('connectBtn').onclick = async () => {
+  key = $('apiKey').value.trim();
+  if (!key) { alert('Enter an API key.'); return; }
+  try {
+    await updateProviders();
+    await loadAdapters();
+    await refresh();
+    $('refreshBtn').disabled = false;
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(refresh, 6000);
+  } catch (err) {
+    alert('Connection failed: ' + err.message);
+  }
+};
+
+$('refreshBtn').onclick = refresh;
+$('demoBtn').onclick = injectDemo;
+$('filterInput').oninput = renderIncidentList;
+
+// Initial provider status check
+updateProviders();
+</script>
+</body>
+</html>
