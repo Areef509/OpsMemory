@@ -33,6 +33,8 @@ class ApprovalRequest:
     state: str = "pending"  # pending|approved|rejected|executed|execution_failed
     audit: list = field(default_factory=list)
     result: dict | None = None
+    created_at: str = ""
+    expires_at: str = ""   # empty = legacy request without expiry
 
     def _log(self, actor, event, **kw):
         self.audit.append({"t": datetime.now(timezone.utc).isoformat(), "actor": actor, "event": event, **kw})
@@ -48,8 +50,9 @@ def decide(req: ApprovalRequest, user: str, role: str, approve: bool, reason: st
     req._log(user, req.state, reason=reason)
 
 
-def execute(req: ApprovalRequest, adapters: dict[str, Adapter], user: str):
-    if req.state != "approved":
+def execute(req: ApprovalRequest, adapters: dict[str, Adapter], user: str, claimed: bool = False):
+    """claimed=True: the engine already moved the request approved -> executing under a lock/persisted state."""
+    if req.state != ("executing" if claimed else "approved"):
         raise ValueError(f"cannot execute request in state '{req.state}'")
     ad = adapters.get(req.adapter)
     if ad is None:
@@ -74,21 +77,28 @@ class VerificationCriteria:
 
 
 def verify_recovery(samples: list[dict], crit: VerificationCriteria, synthetic: bool) -> dict:
-    """samples: [{'error_rate':float,'p99_ms':float}, ...] oldest->newest. Resolved only if the
-    last N samples ALL satisfy the criteria."""
-    n = crit.consecutive_samples
-    if n < 1: return {"resolved": False, "reason": "consecutive_samples must be positive", "synthetic": synthetic}
-    if len(samples) < n:
-        return {"resolved": False, "reason": f"need {n} samples, have {len(samples)}", "synthetic": synthetic}
-    tail = samples[-n:]
-    normalized = []
+    """Resolve only with consecutive healthy samples containing real traffic and healthy state."""
+    n=crit.consecutive_samples
+    if n<1:
+        return {"resolved":False,"reason":"consecutive_samples must be positive","synthetic":synthetic}
+    if len(samples)<n:
+        return {"resolved":False,"reason":f"need {n} samples, have {len(samples)}","synthetic":synthetic}
+    tail=samples[-n:]
+    normalized=[]
     for sample in tail:
-        try: er, p99 = float(sample["error_rate"]), float(sample["p99_ms"])
-        except (KeyError, TypeError, ValueError):
-            return {"resolved": False, "reason": "invalid recovery metric sample", "synthetic": synthetic}
-        if not math.isfinite(er) or not math.isfinite(p99) or not 0 <= er <= 1 or p99 < 0:
-            return {"resolved": False, "reason": "non-finite or out-of-range recovery metric sample", "synthetic": synthetic}
-        normalized.append({"error_rate": er, "p99_ms": p99})
-    bad = [s for s in normalized if s["error_rate"] > crit.max_error_rate or s["p99_ms"] > crit.max_p99_ms]
-    return {"resolved": not bad, "reason": "criteria met" if not bad else f"{len(bad)}/{n} samples violate criteria",
-            "synthetic": synthetic}
+        try:
+            er=float(sample["error_rate"]); p99=float(sample["p99_ms"])
+            traffic=float(sample["request_count"]); degraded=float(sample["degraded"])
+        except (KeyError,TypeError,ValueError):
+            return {"resolved":False,"reason":"missing traffic or degraded-state evidence","synthetic":synthetic}
+        vals=(er,p99,traffic,degraded)
+        if (not all(math.isfinite(v) for v in vals) or not 0<=er<=1
+                or p99<0 or traffic<0 or degraded not in (0,1)):
+            return {"resolved":False,"reason":"invalid recovery metric sample","synthetic":synthetic}
+        normalized.append({"error_rate":er,"p99_ms":p99,
+                           "request_count":traffic,"degraded":degraded})
+    bad=[x for x in normalized if x["error_rate"]>crit.max_error_rate
+         or x["p99_ms"]>crit.max_p99_ms or x["request_count"]<=0 or x["degraded"]!=0]
+    return {"resolved":not bad,
+            "reason":"criteria met" if not bad else f"{len(bad)}/{n} samples violate recovery criteria",
+            "synthetic":synthetic}

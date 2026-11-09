@@ -14,7 +14,7 @@ DEMO = json.loads((pathlib.Path(__file__).parents[3] / "demo" / "payment_pool_ex
 
 class FakeMemory:  # test double
     def __init__(self, shared=None): self.docs = shared if shared is not None else []
-    def recall_similar(self, q): return [Memory(t, None) for t in self.docs]
+    def recall_similar(self, q): return [Memory(t, None, metadata={"verified_metadata": "true", "outcome": "verified_recovery"}) for t in self.docs]
     def retain_post_mortem(self, iid, text, *, verified, resolved_by=None):
         assert verified; self.docs.append(text); return True
 
@@ -26,12 +26,13 @@ class BrokenMemory:
 def make(memory, ids_getter, answers):
     srv, st = serve(answers)
     llm = GroqClient("k", url=f"http://127.0.0.1:{srv.server_port}/", backoff=0)
-    ad = {"demo": Adapter("demo", lambda: {"note": "pool reset (simulated)"}, True)}
+    # TEST-ONLY adapter standing in for a REAL bounded operation (simulated=False). Production registry stays empty.
+    ad = {"demo": Adapter("demo", lambda: {"note": "test-double remediation"}, False)}
     return Engine(InMemoryStore(), llm, memory, ad, DEMO["dependencies"], DEMO["critical_services"]), st
 
 
-GOOD = [{"error_rate": .001, "p99_ms": 300}] * 3
-BAD = [{"error_rate": .3, "p99_ms": 3000}] * 3
+GOOD = [{"error_rate": .001, "p99_ms": 300, "request_count": 5, "degraded": 0}] * 3
+BAD = [{"error_rate": .3, "p99_ms": 3000, "request_count": 5, "degraded": 0}] * 3
 
 
 class Lifecycle(unittest.TestCase):
@@ -57,13 +58,13 @@ class Lifecycle(unittest.TestCase):
         eng.execute(req.id, "ann")
         pm, retained = eng.verify_and_close(iid, GOOD, False)
         self.assertTrue(retained); self.assertEqual(len(shared), 1)
-        self.assertEqual(pm["root_cause"]["status"], "confirmed")
+        self.assertEqual(pm["root_cause"]["status"], "unverified_hypothesis")
         # "restart": brand-new engine+store, same external memory
         eng2, _ = make(FakeMemory(shared), None, [ok(llm_answer(ev[:2], 0))])
         iid2 = eng2.ingest([{**event, "synthetic": False} for event in DEMO["events"]])[0][0]
         inv2 = eng2.investigate(iid2)
         self.assertEqual(len(inv2["memories_used"]), 1)
-        self.assertIn("Confirmed root cause", inv2["memories_used"][0])
+        self.assertIn("Proposed root cause (unconfirmed)", inv2["memories_used"][0])
 
     def test_unverified_recovery_not_retained(self):
         shared = []

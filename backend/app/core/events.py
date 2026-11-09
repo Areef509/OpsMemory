@@ -95,7 +95,16 @@ def normalize(raw: dict[str, Any]) -> NormalizedEvent:
     service = str(raw["service"]).strip().lower()
     env = str(raw["environment"]).strip().lower()
     source = str(raw["source"]).strip().lower()
-    message = redact(str(raw["message"]).strip())
+    msg_str = str(raw["message"]).strip()
+    if len(service) > 128:
+        raise ValidationError("service name exceeds maximum length (128 characters)")
+    if len(env) > 64:
+        raise ValidationError("environment name exceeds maximum length (64 characters)")
+    if len(source) > 64:
+        raise ValidationError("source name exceeds maximum length (64 characters)")
+    if len(msg_str) > 8192:
+        raise ValidationError("message exceeds maximum length (8192 characters)")
+    message = redact(msg_str)
     meta = raw.get("metadata") or {}
     if not isinstance(meta, dict):
         raise ValidationError("metadata must be an object")

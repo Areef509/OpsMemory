@@ -14,6 +14,7 @@ import unittest
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 # Ensure 'backend' directory is on sys.path
 backend_dir = str(Path(__file__).resolve().parents[2])
@@ -39,12 +40,23 @@ from app.store_memory import PostgresStore
 class FullPostgresWorkflowIntegrationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Resolve PostgreSQL DSN from environment or .env
-        dsn = os.environ.get("DATABASE_URL")
-        if not dsn or "localhost" not in dsn and "127.0.0.1" not in dsn and "db" in dsn:
-            env_vals = dotenv_values(".env")
-            pw = env_vals.get("POSTGRES_PASSWORD") or os.environ.get("POSTGRES_PASSWORD", "postgres")
-            dsn = f"postgresql://postgres:{pw}@127.0.0.1:5432/opsmemory"
+        # Fail closed: integration tests require an explicitly supplied disposable DB.
+        dsn = os.environ.get("OPSMEMORY_TEST_DATABASE_URL")
+        if not dsn:
+            raise RuntimeError(
+                "Set OPSMEMORY_TEST_DATABASE_URL to the disposable PostgreSQL test database; "
+                "refusing DATABASE_URL/.env fallback."
+            )
+        parsed = urlsplit(dsn)
+        if (
+            parsed.hostname not in {"127.0.0.1", "localhost"}
+            or parsed.port != 55432
+            or parsed.path.lstrip("/") != "opsmemory_cleanstart"
+        ):
+            raise RuntimeError(
+                "Unsafe integration-test DSN. Expected localhost:55432/opsmemory_cleanstart; "
+                "refusing to connect."
+            )
         cls.dsn = dsn
         try:
             cls.store = PostgresStore(dsn=cls.dsn)
@@ -101,9 +113,10 @@ class FullPostgresWorkflowIntegrationTest(unittest.TestCase):
             def recall_similar(self, query):
                 return [
                     Memory(
-                        text="[VERIFIED post-mortem] Incident prev-42 sev-1. Confirmed root cause: pool exhaustion. Resolution: scaled max_connections to 150.",
+                        text="[VERIFIED post-mortem] Incident prev-42 sev-1. Proposed root cause (unconfirmed): pool exhaustion. Resolution: scaled max_connections to 150.",
                         type="experience",
-                        id="hist-001"
+                        id="hist-001",
+                        metadata={"verified_metadata": "true", "outcome": "verified_recovery"}
                     )
                 ]
             def retain_post_mortem(self, iid, text, *, verified, resolved_by=None):
@@ -186,7 +199,7 @@ class FullPostgresWorkflowIntegrationTest(unittest.TestCase):
         self.assertEqual(len(investigation["hypotheses"]), 1)
         self.assertEqual(investigation["hypotheses"][0]["confidence"], 0.92)
         self.assertEqual(len(investigation["memories_used"]), 1)
-        self.assertIn("Confirmed root cause: pool exhaustion", investigation["memories_used"][0])
+        self.assertIn("Proposed root cause (unconfirmed): pool exhaustion", investigation["memories_used"][0])
         self.assertEqual(investigation["recommendations"][0]["historical_memory_index"], 0)
 
         # Verify incident updated in PostgreSQL
@@ -215,20 +228,19 @@ class FullPostgresWorkflowIntegrationTest(unittest.TestCase):
 
         # Step 6: Recovery Verification & Post-Mortem Generation
         recovery_samples = [
-            {"timestamp": time.time() - 30, "error_rate": 0.002, "p99_ms": 320.0},
-            {"timestamp": time.time() - 15, "error_rate": 0.001, "p99_ms": 310.0},
-            {"timestamp": time.time(), "error_rate": 0.0008, "p99_ms": 290.0}
+            {"timestamp": time.time() - 30, "error_rate": 0.002, "p99_ms": 320.0, "request_count": 5, "degraded": 0},
+            {"timestamp": time.time() - 15, "error_rate": 0.001, "p99_ms": 310.0, "request_count": 5, "degraded": 0},
+            {"timestamp": time.time(), "error_rate": 0.0008, "p99_ms": 290.0, "request_count": 5, "degraded": 0}
         ]
         pm, retained = engine.verify_and_close(iid, recovery_samples, synthetic=False)
         self.assertTrue(pm["verification"]["resolved"])
-        self.assertEqual(pm["root_cause"]["status"], "confirmed")
+        self.assertEqual(pm["root_cause"]["status"], "unverified_hypothesis")
         self.assertEqual(len(pm["resolution"]), 1)
-        self.assertTrue(retained)
-        self.assertEqual(len(retained_memories), 1)
-        self.assertTrue(retained_memories[0]["verified"])
-        self.assertIn("Confirmed root cause: postgres-pool saturation", retained_memories[0]["text"])
-        self.assertIn("Resolution executed: scale-pool", retained_memories[0]["text"])
-        self.assertIn("Recovery verified: criteria met", retained_memories[0]["text"])
+        # Simulated remediation must never become trusted Hindsight learning.
+        self.assertIsNone(retained)
+        self.assertEqual(pm["memory_retention"]["status"], "not_applicable")
+        self.assertEqual(len(retained_memories), 0)
+        self.assertFalse(pm["retain_to_hindsight"])
 
         # Verify final state in PostgreSQL
         final_inc = self.store.get_incident(iid)

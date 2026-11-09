@@ -8,3 +8,35 @@ node_modules/
 dist/
 build/
 evidence/before-after-raw.json
+
+# Local secrets and environment files
+.env*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Local backups and editor/temp files
+*.bak
+*.backup
+*.old
+*.orig
+*~
+*.tmp
+*.swp
+backups/
+_backup/
+
+# OpsMemory local backup artifacts
+.backup*/
+*.backup_*
+*.before_*
+
+# Accidental local artifacts
+e build backend
+python.exe .scriptsrun_ab_experiment.py
+
+# Local pre-change script backups
+scripts/*.before-*

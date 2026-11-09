@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-11-09T15:20:36Z",
+  "providers": {
+    "postgresql": {
+      "configured": true,
+      "status": "connected",
+      "latency_s": 0.329,
+      "counts": {
+        "incidents": 31,
+        "events": 87,
+        "audit_log": 79
+      },
+      "migration_002_applied": true,
+      "preservation_verified": true
+    },
+    "groq": {
+      "configured": true,
+      "status": "connected",
+      "key_masked": "gsk_...BGWi",
+      "model": "openai/gpt-oss-120b",
+      "model_matches_target": true,
+      "latency_s": 1.546,
+      "attempts": 1,
+      "response_status": "ok",
+      "error": null
+    },
+    "hindsight": {
+      "configured": true,
+      "base_url": "https://api.hindsight.vectorize.io",
+      "bank_id": "opsmemory-ab-experiment",
+      "key_masked": "hsk_...ee60",
+      "connection": true,
+      "retention": true,
+      "retrieval": true,
+      "fixture_match": true,
+      "error": null,
+      "api_version": "1.1.0",
+      "bank_status": "present",
+      "latency_s": 5.938,
+      "retention_latency_s": 6.656,
+      "fixture_doc_id": "verify-synthetic-acc0b6ca",
+      "retrieval_latency_s": 5.156,
+      "recalled_count": 23,
+      "status": "connected"
+    },
+    "prometheus": {
+      "configured": false,
+      "status": "not_configured",
+      "note": "PROMETHEUS_BASE_URL is not set (trusted recovery metrics fail closed)"
+    }
+  }
+}

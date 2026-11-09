@@ -96,7 +96,7 @@ class HindsightIntegrationUnitTests(unittest.TestCase):
     def test_ensure_bank_exists_creates_when_not_found(self):
         mem = HindsightMemory(base_url="http://mock-hindsight:8888", bank_id="test-bank")
         mock_client = MagicMock()
-        mock_client.get_bank_config.side_effect = Exception("404 Not Found")
+        mock_client.get_bank_config.side_effect = type("NotFoundError", (Exception,), {"status": 404})("404 Not Found")
         mem._client = mock_client
 
         res = mem.ensure_bank_exists("test-bank")
@@ -187,6 +187,78 @@ class MemoryAblationWorkflowTests(unittest.TestCase):
         self.assertEqual(r2["recommendations"][0]["historical_memory_index"], 0)
         self.assertEqual(r2["recommendations"][0]["action"], "scale-pool")
         self.assertIn("Verified past incident", r2["recommendations"][0]["reason"])
+
+
+class ABExperimentRegressionTests(unittest.TestCase):
+    """Regression tests for scripts/run_ab_experiment.py and provider verification logic."""
+
+    def test_scenario_hash_deterministic(self):
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+        from run_ab_experiment import compute_scenario_hash
+
+        demo1 = {
+            "events": [
+                {"service": "payment-api", "message": "error timeout", "timestamp": "2026-11-05T09:00:00Z"},
+                {"service": "postgres-primary", "message": "pool 95%", "timestamp": "2026-11-05T09:01:00Z"}
+            ]
+        }
+        # Same events in reversed order
+        demo2 = {
+            "events": [
+                {"service": "postgres-primary", "message": "pool 95%", "timestamp": "2026-11-05T09:01:00Z"},
+                {"service": "payment-api", "message": "error timeout", "timestamp": "2026-11-05T09:00:00Z"}
+            ]
+        }
+        h1 = compute_scenario_hash(demo1)
+        h2 = compute_scenario_hash(demo2)
+        self.assertEqual(h1, h2)
+        self.assertIsInstance(h1, str)
+        self.assertEqual(len(h1), 16)
+
+    def test_exact_fixture_recalled_requires_exact_doc_id(self):
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+        from run_ab_experiment import verify_exact_fixture_recalled
+
+        fixture_id = "exp-fixture-a1b2c3d4"
+
+        # Contract (provenance work): only structured sources carrying the exact document_id AND a prompt index count.
+        # Case 0: free text, even containing the id, is NOT provenance and must FAIL
+        self.assertFalse(verify_exact_fixture_recalled(fixture_id, [f"Incident 4092 [{fixture_id}]: text only"]))
+        # Case 1: a different document must FAIL
+        generic_memory = [{"document_id": "other-doc", "prompt_memory_index": 0}]
+        self.assertFalse(verify_exact_fixture_recalled(fixture_id, generic_memory))
+
+        # Case 2: exact document_id with a prompt index must PASS
+        exact_memory = [{"document_id": fixture_id, "prompt_memory_index": 0}]
+        self.assertTrue(verify_exact_fixture_recalled(fixture_id, exact_memory))
+        # Case 2b: exact document_id but not actually placed in the prompt must FAIL
+        self.assertFalse(verify_exact_fixture_recalled(fixture_id, [{"document_id": fixture_id}]))
+
+        # Case 3: Empty inputs must fail safely
+        self.assertFalse(verify_exact_fixture_recalled("", exact_memory))
+        self.assertFalse(verify_exact_fixture_recalled(fixture_id, []))
+
+    def test_validate_config_detects_missing_keys(self):
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
+        from run_ab_experiment import validate_config
+
+        with patch.dict(os.environ, {"GROQ_API_KEY": "", "HINDSIGHT_BASE_URL": ""}, clear=False):
+            missing, cfg = validate_config()
+            self.assertIn("GROQ_API_KEY", missing)
+            self.assertIn("HINDSIGHT_BASE_URL", missing)
+
+        with patch.dict(os.environ, {"GROQ_API_KEY": "test-key", "HINDSIGHT_BASE_URL": "http://test:8888", "HINDSIGHT_EXPERIMENT_API_KEY": "test-hindsight-key"}, clear=False):
+            missing, cfg = validate_config()
+            self.assertEqual(missing, [])
+            self.assertEqual(cfg["GROQ_API_KEY"], "test-key")
+            self.assertEqual(cfg["HINDSIGHT_BASE_URL"], "http://test:8888")
+            self.assertEqual(cfg["HINDSIGHT_EXPERIMENT_BANK_ID"], "opsmemory-ab-experiment")
 
 
 if __name__ == "__main__":

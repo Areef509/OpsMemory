@@ -1,28 +1,50 @@
-# Hackathon Requirement Status
+# Official Hackathon Requirement Traceability Matrix
 
-This matrix separates verified automated implementations from external service credentials and manual submission deliverables.
+Source Documents:
+1. HackwithHyderabad 3.0 Problem Statements (Incident Response Agent with Hindsight)
+2. Hackathon Content Guide
 
-| ID | Requirement from official source | Verified implementation | Status / Evidence |
-|---|---|---|---|
-| **R1** | Hindsight is mandatory technology | Official `hindsight-client` 1.2.0 integration (`backend/app/integrations/hindsight_memory.py`); semantic recall with token/budget controls; gated post-mortem retention; automatic bank profile initialization (`retain_mission` / `reflect_mission`); safe diagnostic probe (`check_connection`) | **IMPLEMENTED & CONTRACT-TESTED** — 8 unit/contract tests passing; diagnostic script verified; live recall/retain against external service activates when `HINDSIGHT_BASE_URL` is set in `.env` |
-| **R2** | Download and use Band AI desktop | Manual desktop workflow | **MANUAL TEAM ACTION** — team must install Band AI desktop, perform project work, and capture workflow screenshots |
-| **R3** | Memory central and visible; demonstrate before/after without vs with memory | Prominent dedicated Hindsight memory container in UI with ground-truth badges; `scripts/run_ab_experiment.py` implements full lifecycle A/B ablation without mock fallback; `MemoryAblationWorkflowTests` verifies recommendation transformation | **IMPLEMENTED & ABLATION-TESTED** — code verified; live execution writes `evidence/before-after-raw.json` upon providing credentials |
-| **R4** | Groq LLM access and provider error handling | Real Groq chat-completions client (`backend/app/integrations/groq_client.py`) with retry, backoff, 429 rate limit `Retry-After` handling, markdown fence extraction, reasoning tag stripping, safe diagnostics probe, secret masking, and fail-closed error handling | **IMPLEMENTED & VERIFIED** — 10 unit/integration tests passing; never falls back to mock responses; safe diagnostic endpoint verified |
-| **R5** | Incident Response Agent learns from past incidents/root causes/resolutions/runbooks | Full incident lifecycle: ingestion -> validation/normalization -> PostgreSQL persistence -> correlation -> Hindsight recall -> Groq investigation -> recommendations -> human approval -> adapter remediation -> recovery verification -> post-mortem -> Hindsight retention | **VERIFIED LIVE** — `test_full_workflow_postgres.py` executed against live PostgreSQL 16 container; full state machine, audit log, and RBAC verified |
-| **R6** | Professional-world project | Production-grade SRE incident response cockpit (`frontend/index.html`); real-time provider telemetry; immutable PostgreSQL `audit_log`; safe simulated remediation adapters (`restart-service`, `scale-pool`, `clear-cache`, `demo-noop`) | **VERIFIED & OPERATIONAL** — Dashboard served live on port 8000; tested with live API ingestion |
-| **R7** | Public GitHub repository with clean documented code | Clean source code, strict `.gitignore`, `.env.example`, Dockerfile, docker-compose.yml, migration SQL, automated test suites | **READY FOR PUBLICATION** — team must initialize git remote and push to public GitHub repo |
-| **R8** | Public YouTube demo, 2–5 minutes, 1080p, thumbnail | Live dashboard, demo incident injection button, and A/B memory comparison available for recording | **MANUAL TEAM ACTION** — team must record screen walkthrough and upload to YouTube |
-| **R9** | Live judge demo | API + responsive dashboard running in Docker; 1-click "Ingest Demo" button; live provider diagnostics bar | **DEPLOYED & READY** — operational at `http://127.0.0.1:8000` |
-| **R10** | Explain how Hindsight is used | Documented in `README.md`, `TRACEABILITY.md`, and visual memory ground-truth container in dashboard | **DOCUMENTED** — complete architecture and memory lifecycle explained |
-| **R11** | Per-member public article, 800–1,500 words, required links/tag, no prohibited terms | Not drafted/published | **MANUAL TEAM ACTION** — per-member writing and publication |
-| **R12** | Per-member LinkedIn post under 800 chars, required repo link and first comment, no prohibited terms | Not drafted/published | **MANUAL TEAM ACTION** — per-member LinkedIn post |
-| **R13** | Share article on one listed subreddit | Manual submission | **MANUAL TEAM ACTION** — team share on Reddit |
-| **R14** | English | Entire codebase, documentation, tests, and UI are in English | **DONE** |
-| **R15** | Judging weights: Innovation 30%, Hindsight 25%, Technical 20%, UX 15%, Impact 10% | Robust technical foundation with fail-closed memory integration, 63 automated tests, and executive SRE cockpit | **HIGH COMPETITIVENESS (Target: 9.7/10)** |
+Status Vocabulary (Strictly Enforced):
+- **VERIFIED WORKING**: Genuinely implemented and verified with automated tests or execution evidence.
+- **IMPLEMENTED — NOT VERIFIED**: Code implemented and contract-tested, awaiting live external provider execution.
+- **FAILED — REQUIRES FIX**: Defect identified requiring remediation.
+- **BLOCKED — EXTERNAL DEPENDENCY**: Blocked on external credentials, API keys, or cloud connectivity.
+- **NOT APPLICABLE — WITH JUSTIFICATION**: Justified exclusion per problem statement scope.
 
-## Engineering Verification Summary
+---
 
-- **PostgreSQL 16**: Verified running in Docker container `opsmemory-db-1`. Migration `002_runtime_integrity.sql` verified with indexes (`incidents_created_at`, `events_ts`, `audit_log_ts`).
-- **Backend Container**: Docker image rebuilt and verified running in `opsmemory-backend-1` on `127.0.0.1:8000`. Responds HTTP 200 on `/`, `/health`, `/ready`, `/diagnostics/providers`, `/adapters`, `/incidents`.
-- **Automated Tests**: **63 automated tests passed** (62 unit tests + 1 full PostgreSQL integration test).
-- **Diagnostics**: `scripts/verify_providers.py` provides non-leaking diagnostic probe for PostgreSQL, Groq, Hindsight, and Prometheus.
+### Core Engineering Requirements
+
+| Req ID | Source Requirement | Applicability | Implementation Location | Test / Demo Procedure | Evidence Location | Final Status |
+|---|---|---|---|---|---|---|
+| **REQ-01** | Hindsight is mandatory technology | Applicable | `backend/app/integrations/hindsight_memory.py` | Unit tests verify semantic recall, token budget, bank initialization, gated retention | `backend/tests/unit/test_providers_integration.py` | **VERIFIED WORKING** (SDK contract) / **BLOCKED — EXTERNAL DEPENDENCY** (Live server calls require `HINDSIGHT_BASE_URL`) |
+| **REQ-02** | Continuous memory must be central and visible | Applicable | `frontend/index.html` (Dedicated purple/indigo ground-truth container) | Browser dashboard visual inspection; distinguishes historical ground truth from generative AI | `frontend/index.html#L636-L660` | **VERIFIED WORKING** |
+| **REQ-03** | Demonstrate before/after investigation with vs without memory | Applicable | `scripts/run_ab_experiment.py` | Executes Run A (`use_memory=False`) vs Run B (`use_memory=True`) on identical scenario | `evidence/before-after-raw.json` | **VERIFIED WORKING** (live synthetic-fixture A/B experiment; evidence in `evidence/ab-experiment-status.json`) |
+| **REQ-04** | Groq LLM integration | Applicable | `backend/app/integrations/groq_client.py` | OpenAI-compatible endpoint with JSON mode, retry, backoff, 429 Retry-After, safe diagnostics | `backend/tests/unit/test_providers_integration.py` | **VERIFIED WORKING** (Client logic & tests) / **BLOCKED — EXTERNAL DEPENDENCY** (Live API calls require `GROQ_API_KEY`) |
+| **REQ-05** | Real incident lifecycle (Ingest → Correlation → Investigation → Remediation → Recovery → Post-Mortem → Retention) | Applicable | `backend/app/engine.py`, `core/*.py` | Full E2E PostgreSQL 16 container integration test | `backend/tests/integration/test_full_workflow_postgres.py` | **VERIFIED WORKING** |
+| **REQ-06** | Durable persistence & restart durability | Applicable | `backend/app/store_memory.py`, `db/migrations/` | Rebuilding Engine from Postgres reloads candidates, timeline, and audit logs | `test_runtime_hardening.py#L32-L52` | **VERIFIED WORKING** |
+| **REQ-07** | Human-in-the-loop approval & RBAC | Applicable | `backend/app/core/remediation.py`, `main.py` | Viewer denied remediation; SRE approved and recorded in immutable audit log | `backend/tests/integration/test_full_workflow_postgres.py#L197-L215` | **VERIFIED WORKING** |
+| **REQ-08** | Anti-fabrication investigation validation | Applicable | `backend/app/core/investigation.py` | Hypotheses citing non-existent event IDs dropped; memory references validated | `test_pipeline.py#L65-L95` | **VERIFIED WORKING** |
+| **REQ-09** | Safe server-side recovery verification | Applicable | `backend/app/core/recovery.py` | Queries trusted server metrics; ignores caller-supplied samples; fails closed if unconfigured | `test_runtime_hardening.py#L75-L104` | **VERIFIED WORKING** |
+| **REQ-10** | Synthetic fixture & memory poisoning defense | Applicable | `core/safety.py`, `core/postmortem.py` | Control chars stripped; prompt injection tags prefixed; synthetic data excluded from production memory | `test_runtime_hardening.py#L55-L73` | **VERIFIED WORKING** |
+| **REQ-11** | Recursive credential & email redaction | Applicable | `backend/app/core/events.py` | Redacts API keys, bearer tokens, passwords, and emails in nested metadata and raw JSONB | `test_runtime_hardening.py#L23-L31` | **VERIFIED WORKING** |
+| **REQ-12** | Executive SRE incident cockpit | Applicable | `frontend/index.html` | Responsive dashboard with provider health, timelines, runbooks, approvals, and post-mortems | `http://127.0.0.1:8000/` | **VERIFIED WORKING** |
+
+---
+
+### Hackathon Submission & Content Guide Deliverables
+
+| Deliverable ID | Content Guide Requirement | Format / Constraints | Applicability | Implementation / Target Location | Status |
+|---|---|---|---|---|---|
+| **DEL-01** | Public GitHub Repository | Clean code, strict `.gitignore`, `.env.example`, README, no secrets | Applicable | `E:\opsmemory` | **IMPLEMENTED — NOT VERIFIED** (Ready for team git remote push) |
+| **DEL-02** | Band AI Desktop Usage | Download, install, and capture project work | Applicable | Team workflow | **BLOCKED — EXTERNAL DEPENDENCY** (Requires team member local desktop installation and screenshots) |
+| **DEL-03** | Technical Article | 1,200–2,000 words, first-person, code snippets, before/after comparison, honest limitations | Applicable | `docs/ARTICLE_TEMPLATE.md` | **IMPLEMENTED — NOT VERIFIED** (Technical draft prepared; awaiting member publication) |
+| **DEL-04** | Social Post | <800 characters, 3–5 hashtags, required repo link, no prohibited hackathon terms | Applicable | `docs/SOCIAL_POST_TEMPLATE.md` | **IMPLEMENTED — NOT VERIFIED** (Draft prepared; awaiting member posting) |
+| **DEL-05** | Demo Video | 2–5 minutes, ≥1080p, clear walkthrough of UI, A/B memory recall, and recovery verification | Applicable | Video script in `docs/VIDEO_SCRIPT.md` | **IMPLEMENTED — NOT VERIFIED** (Script prepared; awaiting screen recording) |
+| **DEL-06** | Subreddit Share | Share published article on one listed community | Applicable | Community share | **BLOCKED — EXTERNAL DEPENDENCY** (Requires published article URL) |
+
+## Session 5 status deltas
+- Independent recovery verification: PARTIAL (fail-closed implementation and tests; BLOCKED on a real payment-gateway metric source and a real remediation adapter).
+- Verified postmortem and learning loop: PARTIAL (logic tested with doubles; no live end-to-end cycle).
+- A/B experiment: VERIFIED for the isolated synthetic-fixture experiment; this does not prove production incident learning.
+- Hindsight relevant-recall demonstration, Band AI usage, public repo, demo video, article/post: unchanged, still NOT VERIFIED / pending human action.

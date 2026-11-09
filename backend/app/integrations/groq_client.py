@@ -99,7 +99,8 @@ class GroqClient:
                 method="POST",
                 headers={
                     "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "User-Agent": "OpsMemory/1.0"
                 }
             )
             t0 = time.monotonic()

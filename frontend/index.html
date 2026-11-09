@@ -68,7 +68,7 @@ h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
 .status-bar {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 .provider-badge {
@@ -227,6 +227,7 @@ main {
 .state-investigated { background: #1e3a8a; color: #93c5fd; }
 .state-remediation_pending { background: #78350f; color: #fde68a; }
 .state-resolved { background: #064e3b; color: #6ee7b7; }
+.state-unresolved { background: #881337; color: #fecdd3; }
 
 .section {
   margin-top: 18px;
@@ -263,7 +264,7 @@ main {
 .metric-label { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; }
 .metric-value { font-size: 14px; font-weight: 600; }
 
-/* Memory highlight container */
+/* Hindsight Continuous Memory visual container */
 .memory-box {
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(56, 189, 248, 0.05));
   border: 1px solid rgba(168, 85, 247, 0.35);
@@ -334,7 +335,7 @@ main {
   background: var(--accent);
 }
 .timeline-time { font-size: 11px; color: var(--text-muted); }
-.empty-state {
+.empty {
   text-align: center;
   padding: 48px 16px;
   color: var(--text-muted);
@@ -349,10 +350,89 @@ pre {
   overflow-x: auto;
   color: #cbd5e1;
 }
-@media (max-width: 900px) {
+@media (max-width: 850px) {
   main { grid-template-columns: 1fr; }
   header { padding: 12px 16px; }
 }
+/* OpsMemory premium command-center visual refresh */
+:root {
+  --bg:#060914; --surface:rgba(13,21,39,.94); --surface-raised:#111d33;
+  --surface-border:rgba(103,145,195,.22); --line:rgba(103,145,195,.16);
+  --text:#edf5ff; --text-muted:#91a4bd; --accent:#55c8ff;
+  --accent-glow:rgba(56,189,248,.19); --purple:#b18aff;
+  --green:#34d399; --amber:#fbbf24; --red:#fb7185;
+}
+html { background:var(--bg); scroll-behavior:smooth; }
+body {
+  background:
+    radial-gradient(ellipse at 12% -10%,rgba(14,116,190,.20),transparent 38%),
+    radial-gradient(ellipse at 92% 8%,rgba(124,58,237,.15),transparent 34%),
+    linear-gradient(145deg,#070b17 0%,#080f1e 48%,#060914 100%);
+  color:var(--text); letter-spacing:.008em;
+}
+header {
+  background:rgba(8,14,28,.88); border-bottom:1px solid rgba(93,155,211,.2);
+  backdrop-filter:blur(18px); box-shadow:0 8px 32px rgba(0,0,0,.22);
+  padding:16px 28px;
+}
+.logo-icon {
+  width:40px;height:40px;border-radius:12px;
+  background:linear-gradient(135deg,#0284c7 0%,#2563eb 48%,#8b5cf6 100%);
+  box-shadow:0 0 28px rgba(56,189,248,.25);font-size:19px;
+}
+h1 {font-size:20px;letter-spacing:-.035em;}
+.subtitle {font-size:11px;letter-spacing:.025em;}
+main {max-width:1720px;padding:24px 28px;gap:22px;grid-template-columns:minmax(290px,350px) minmax(0,1fr);}
+.panel {
+  background:linear-gradient(155deg,rgba(17,29,52,.94),rgba(10,17,32,.97));
+  border:1px solid var(--surface-border);border-radius:15px;padding:19px;
+  box-shadow:0 18px 50px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.025);
+}
+.sidebar-header {padding-bottom:12px;border-bottom:1px solid var(--line);}
+.section {border-top:1px solid var(--line);padding-top:19px;margin-top:21px;}
+.section-title {color:#b7c9df;font-size:11px;letter-spacing:.11em;margin-bottom:15px;}
+.incident-list {gap:10px;max-height:calc(100vh - 220px);padding:2px;}
+.incident-card {
+  background:linear-gradient(120deg,rgba(22,37,63,.88),rgba(14,25,44,.92));
+  border:1px solid rgba(105,145,190,.17);border-radius:11px;padding:13px 14px;
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+.incident-card:hover {transform:translateY(-2px);border-color:rgba(85,200,255,.55);box-shadow:0 8px 22px rgba(0,0,0,.2);}
+.incident-card.active {
+  border-color:rgba(85,200,255,.8);
+  background:linear-gradient(120deg,rgba(12,74,110,.48),rgba(30,41,75,.85));
+  box-shadow:0 0 0 1px rgba(85,200,255,.12),0 8px 24px rgba(14,116,190,.12);
+}
+.incident-card-title {font-size:13px;letter-spacing:.015em;}
+.pill {border-radius:999px;padding:3px 9px;font-size:9px;letter-spacing:.07em;}
+.provider-badge {
+  background:rgba(20,34,57,.8);border:1px solid var(--surface-border);
+  border-radius:999px;padding:6px 10px;color:#c7d7e9;
+}
+input,select,button {
+  border-radius:8px;border-color:rgba(112,153,197,.25);
+  background:#101c31;color:var(--text);padding:9px 12px;
+}
+input:focus,select:focus {border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.12);}
+button {transition:all .18s ease;}
+button:hover:not(:disabled) {transform:translateY(-1px);box-shadow:0 5px 16px rgba(37,99,235,.2);}
+button.btn-primary {background:linear-gradient(120deg,#0284c7,#2563eb);border-color:#269bd8;}
+button.btn-success {background:linear-gradient(120deg,#047857,#059669);border-color:#10b981;}
+button.btn-danger {background:linear-gradient(120deg,#881337,#be123c);border-color:#e11d48;}
+.metric-box,.rec-card {
+  background:linear-gradient(145deg,rgba(20,35,59,.9),rgba(13,23,41,.95));
+  border:1px solid rgba(105,145,190,.2);border-radius:11px;padding:14px;
+}
+.metric-value {font-size:20px;font-weight:750;letter-spacing:-.035em;}
+.empty {color:var(--text-muted);padding:22px 14px;text-align:center;}
+small {line-height:1.5;}
+@media(max-width:850px) {
+  main {grid-template-columns:minmax(0,1fr);padding:14px;gap:14px;}
+  header {padding:12px 15px;}
+  .panel {padding:15px;border-radius:12px;}
+  .incident-list {max-height:360px;}
+}
+@media(min-width:1500px) {main {padding-left:36px;padding-right:36px;}}
 </style>
 </head>
 <body>
@@ -374,37 +454,68 @@ pre {
   </div>
 
   <div class="toolbar">
+    <span id="userRoleBadge" class="pill state-investigated" style="display:none"></span>
     <input id="apiKey" type="password" autocomplete="off" placeholder="X-API-Key (e.g. alice:sre)" style="width:200px">
-    <button id="connectBtn" class="btn-primary">Connect</button>
+    <button id="connect" class="btn-primary">Connect</button>
+    <button id="refresh" disabled>Refresh</button>
     <button id="demoBtn" title="Ingest simulated payment pool incident">Ingest Demo</button>
-    <button id="refreshBtn" disabled>Refresh</button>
   </div>
 </header>
 
 <main>
-  <!-- Left Column: Incidents List -->
+  <!-- Left Panel: Incidents Queue -->
   <section class="panel">
     <div class="sidebar-header">
-      <div><strong>Recorded Incidents</strong> <span id="incidentCount" class="pill state-open">0</span></div>
-      <small id="lastUpdated" style="color:var(--text-muted)">Not connected</small>
+      <div><strong>Recorded Incidents</strong> <span id="count" class="pill state-open">0</span></div>
+      <small id="updated" style="color:var(--text-muted)">Not connected</small>
     </div>
     <div style="margin-bottom:10px">
-      <input id="filterInput" type="text" placeholder="Filter incidents..." style="width:100%">
+      <input id="filterInput" type="text" placeholder="Filter incidents by service, ID..." style="width:100%">
     </div>
-    <div id="incidentsContainer" class="incident-list">
-      <div class="empty-state">Enter an API key to view recorded incidents.</div>
+    <div id="incidents" class="incident-list">
+      <div class="empty">Enter an API key to view recorded incidents.</div>
     </div>
   </section>
 
-  <!-- Right Column: Incident Workspace & Investigation -->
-  <section class="panel" id="detailPanel">
-    <div class="empty-state">Select an incident from the left queue to view root-cause analysis, recalled memories, and runbooks.</div>
+  <!-- Right Panel: Incident Workspace & Investigation -->
+  <section class="panel" id="detail">
+    <div class="empty">Select an incident from the left queue to inspect evidence, root-cause analysis, and runbooks.</div>
   </section>
 </main>
 
 <script>
+// ID compatibility wrapper supporting both legacy and modern element IDs
+const _rawGetElementById = document.getElementById.bind(document);
+const ID_ALIASES = {
+  'connectBtn': 'connect',
+  'connect': 'connect',
+  'refreshBtn': 'refresh',
+  'refresh': 'refresh',
+  'incidentsContainer': 'incidents',
+  'incidents': 'incidents',
+  'detailPanel': 'detail',
+  'detail': 'detail',
+  'incidentCount': 'count',
+  'count': 'count',
+  'lastUpdated': 'updated',
+  'updated': 'updated',
+  'investigateBtn': 'investigate'
+};
+
+document.getElementById = function(id) {
+  const el = _rawGetElementById(id);
+  if (el) return el;
+  const canonical = ID_ALIASES[id];
+  return canonical ? _rawGetElementById(canonical) : null;
+};
 const $ = id => document.getElementById(id);
-let key = '', incidents = [], selectedId = null, refreshInterval = null, adapters = [];
+
+let key = '';
+let incidents = [];
+let selectedId = null;
+let refreshInterval = null;
+let adapters = [];
+let currentUserRole = null;
 
 async function api(path, options = {}) {
   const res = await fetch(path, {
@@ -416,7 +527,10 @@ async function api(path, options = {}) {
     }
   });
   const data = await res.json().catch(() => ({ detail: res.statusText }));
-  if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+  if (!res.ok) {
+    const errorMsg = data.detail || `HTTP ${res.status}`;
+    throw new Error(errorMsg);
+  }
   return data;
 }
 
@@ -428,18 +542,38 @@ function esc(str) {
 
 async function updateProviders() {
   try {
+    try { const me = await api('/me'); currentUserRole = me.role; const rb = $('userRoleBadge'); if (rb) { rb.style.display = 'inline-block'; rb.textContent = `${me.name} (${me.role})`; } } catch (e) { /* handled below */ }
     const diag = await api('/diagnostics/providers');
-    $('badgePostgres').innerHTML = `<span class="dot ${diag.database.status==='connected'?'dot-green':'dot-red'}"></span> PostgreSQL`;
-    $('badgeGroq').innerHTML = `<span class="dot ${diag.groq.connected?'dot-green':(diag.groq.configured?'dot-amber':'dot-muted')}"></span> Groq (${esc(diag.groq.model||'LLM')})`;
-    $('badgeHindsight').innerHTML = `<span class="dot ${diag.hindsight.connected?'dot-green':(diag.hindsight.configured?'dot-amber':'dot-muted')}"></span> Hindsight (${esc(diag.hindsight.bank_id||'bank')})`;
-    $('badgePrometheus').innerHTML = `<span class="dot ${diag.prometheus.configured?'dot-green':'dot-muted'}"></span> Prometheus`;
+    if (diag.user) {
+      currentUserRole = diag.user.role;
+      const roleBadge = $('userRoleBadge');
+      if (roleBadge) {
+        roleBadge.style.display = 'inline-block';
+        roleBadge.textContent = `${diag.user.name} (${diag.user.role})`;
+      }
+    }
+    const pgConnected = diag.database && diag.database.status === 'connected';
+    $('badgePostgres').innerHTML = `<span class="dot ${pgConnected ? 'dot-green' : 'dot-red'}"></span> PostgreSQL`;
+
+    const groqConnected = diag.groq && diag.groq.connected === true;
+    const groqConfigured = diag.groq && diag.groq.configured === true;
+    const groqModel = diag.groq && diag.groq.model ? diag.groq.model : 'LLM';
+    $('badgeGroq').innerHTML = `<span class="dot ${groqConnected ? 'dot-green' : (groqConfigured ? 'dot-amber' : 'dot-muted')}"></span> Groq (${esc(groqModel)})`;
+
+    const hConnected = diag.hindsight && diag.hindsight.connected === true;
+    const hConfigured = diag.hindsight && diag.hindsight.configured === true;
+    const hBank = diag.hindsight && diag.hindsight.bank_id ? diag.hindsight.bank_id : 'bank';
+    $('badgeHindsight').innerHTML = `<span class="dot ${hConnected ? 'dot-green' : (hConfigured ? 'dot-amber' : 'dot-muted')}"></span> Hindsight (${esc(hBank)})`;
+
+    const promConfigured = diag.prometheus && diag.prometheus.configured === true;
+    $('badgePrometheus').innerHTML = `<span class="dot ${promConfigured ? 'dot-green' : 'dot-muted'}"></span> Prometheus`;
   } catch (err) {
-    // Fall back to public /ready
+    // Fall back to unauthenticated /ready endpoint
     try {
       const ready = await fetch('/ready').then(r => r.json());
-      $('badgePostgres').innerHTML = `<span class="dot ${ready.postgres==='connected'?'dot-green':'dot-red'}"></span> PostgreSQL`;
-      $('badgeGroq').innerHTML = `<span class="dot ${ready.groq_configuration==='present'?'dot-amber':'dot-muted'}"></span> Groq`;
-      $('badgeHindsight').innerHTML = `<span class="dot ${ready.hindsight_configuration==='present'?'dot-amber':'dot-muted'}"></span> Hindsight`;
+      $('badgePostgres').innerHTML = `<span class="dot ${ready.postgres === 'connected' ? 'dot-green' : 'dot-red'}"></span> PostgreSQL`;
+      $('badgeGroq').innerHTML = `<span class="dot ${ready.groq_configuration === 'present' ? 'dot-amber' : 'dot-muted'}"></span> Groq`;
+      $('badgeHindsight').innerHTML = `<span class="dot ${ready.hindsight_configuration === 'present' ? 'dot-amber' : 'dot-muted'}"></span> Hindsight`;
     } catch (e) {}
   }
 }
@@ -448,22 +582,24 @@ async function loadAdapters() {
   try {
     adapters = await api('/adapters');
   } catch (e) {
-    adapters = [{ name: 'demo-noop', simulated: true }];
+    // Fail closed: never invent remediation adapters when the registry is unavailable.
+    adapters = [];
+    console.error('Adapter registry unavailable:', e.message);
   }
 }
 
 function renderIncidentList() {
-  const container = $('incidentsContainer');
-  const filter = ($('filterInput').value || '').toLowerCase();
+  const container = $('incidents');
+  const filter = ($('filterInput') ? $('filterInput').value : '').toLowerCase().trim();
   const filtered = incidents.filter(x => {
     return x.id.toLowerCase().includes(filter) ||
            (x.services || []).join(' ').toLowerCase().includes(filter) ||
            (x.severity || '').toLowerCase().includes(filter);
   });
 
-  $('incidentCount').textContent = incidents.length;
+  $('count').textContent = incidents.length;
   if (!filtered.length) {
-    container.innerHTML = '<div class="empty-state">No incidents match the filter.</div>';
+    container.innerHTML = '<div class="empty">No incidents match the filter.</div>';
     return;
   }
 
@@ -471,8 +607,9 @@ function renderIncidentList() {
     const active = selectedId === inc.id ? 'active' : '';
     const sev = (inc.severity || 'SEV-4').toLowerCase();
     const state = (inc.state || 'open').toLowerCase();
+    const originLabel = inc.synthetic ? 'Synthetic' : 'Prod';
     return `
-      <div class="incident-card ${active}" onclick="selectIncident('${esc(inc.id)}')">
+      <div class="incident-card ${active}" data-incident-id="${esc(inc.id)}">
         <div class="incident-card-top">
           <span class="incident-card-title">${esc(inc.id)}</span>
           <span class="pill ${sev}">${esc(inc.severity || 'SEV-4')}</span>
@@ -482,11 +619,18 @@ function renderIncidentList() {
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span class="pill state-${state}">${esc(inc.state || 'open')}</span>
-          <small style="color:var(--text-muted)">${inc.synthetic ? 'Synthetic' : 'Prod'}</small>
+          <small style="color:var(--text-muted)">${originLabel}</small>
         </div>
       </div>
     `;
   }).join('');
+
+  // Attach safe click listeners (no inline onclick)
+  container.querySelectorAll('[data-incident-id]').forEach(card => {
+    card.addEventListener('click', () => {
+      selectIncident(card.getAttribute('data-incident-id'));
+    });
+  });
 }
 
 function selectIncident(id) {
@@ -497,7 +641,7 @@ function selectIncident(id) {
 }
 
 function renderIncidentDetail(inc) {
-  const p = $('detailPanel');
+  const p = $('detail');
   const inv = inc.investigation || {};
   const hyp = inv.hypotheses || [];
   const recs = inv.recommendations || [];
@@ -508,6 +652,20 @@ function renderIncidentDetail(inc) {
 
   const sevClass = (inc.severity || 'SEV-4').toLowerCase();
   const stateClass = `state-${(inc.state || 'open').toLowerCase()}`;
+  const originTag = inc.synthetic ? 'Synthetic Fixture' : 'Production Incident';
+
+  // Role gating checks
+  const isViewer = currentUserRole === 'viewer';
+  const isAdmin = currentUserRole === 'admin';
+
+  let memoryStatusText = '0 Recalled';
+  if (inv.memory_error) {
+    memoryStatusText = `<span style="color:var(--red)">Recall Error</span>`;
+  } else if (memories.length > 0) {
+    memoryStatusText = `<span style="color:var(--green)">${memories.length} Recalled</span>`;
+  } else if (inv.use_memory === false) {
+    memoryStatusText = `<span class="muted">Disabled</span>`;
+  }
 
   p.innerHTML = `
     <!-- Incident Header Banner -->
@@ -517,39 +675,39 @@ function renderIncidentDetail(inc) {
           <h2 style="margin:0;font-size:20px;font-weight:700">${esc(inc.id)}</h2>
           <span class="pill ${sevClass}">${esc(inc.severity || 'Unknown')}</span>
           <span class="pill ${stateClass}">${esc(inc.state || 'open')}</span>
-          <span class="pill" style="background:#1e293b;color:var(--text-muted)">${inc.synthetic ? 'Synthetic Fixture' : 'Production'}</span>
+          <span class="pill" style="background:#1e293b;color:var(--text-muted)">${originTag}</span>
         </div>
         <div style="color:var(--text-muted);font-size:12px;margin-top:4px">
-          Services: <strong>${esc((inc.services || []).join(', '))}</strong>
+          Affected Services: <strong>${esc((inc.services || []).join(', ') || 'none')}</strong>
         </div>
       </div>
 
       <div class="toolbar">
-        <button id="investigateBtn" class="btn-primary" onclick="runInvestigation('${esc(inc.id)}')">
+        <button id="investigate" class="btn-primary" data-action="investigate" ${isViewer ? 'disabled title="Viewers cannot trigger investigations"' : ''}>
           ${inv.summary ? 'Re-investigate' : 'Run Investigation'}
         </button>
-        <button id="verifyBtn" class="btn-success" onclick="runVerification('${esc(inc.id)}')">
+        <button id="verifyAction" class="btn-success" data-action="verify" ${!isAdmin ? 'disabled title="Admin role required for recovery verification"' : ''}>
           Verify Recovery (Admin)
         </button>
       </div>
     </div>
 
-    <!-- Severity Explanation & Meta Grid -->
+    <!-- Severity Explanation & Telemetry Metric Grid -->
     <div class="grid-3" style="margin-bottom:16px">
       <div class="metric-box">
-        <div class="metric-label">Severity Score & Reasons</div>
+        <div class="metric-label">Severity Score & Explanation</div>
         <div class="metric-value">${esc(inc.severity_score ?? '—')} / 15</div>
-        <small style="color:var(--text-muted)">${esc((inc.severity_reasons || []).join('; ') || 'Standard classification')}</small>
+        <small style="color:var(--text-muted)">${esc((inc.severity_reasons || []).join('; ') || 'Deterministic classification')}</small>
       </div>
       <div class="metric-box">
-        <div class="metric-label">LLM Provider & Latency</div>
-        <div class="metric-value">${esc(inv.llm?.model || 'Groq LPU')}</div>
+        <div class="metric-label">Groq LLM Reasoning Telemetry</div>
+        <div class="metric-value">${esc(inv.llm?.model || 'Configured Model')}</div>
         <small style="color:var(--text-muted)">Latency: ${inv.llm?.latency_s ? inv.llm.latency_s + 's' : '—'} · Total: ${inv.total_s ? inv.total_s + 's' : '—'}</small>
       </div>
       <div class="metric-box">
-        <div class="metric-label">Hindsight Continuous Memory</div>
-        <div class="metric-value">${memories.length} recalled item(s)</div>
-        <small style="color:var(--text-muted)">Status: ${inv.memory_error ? '<span style="color:var(--red)">' + esc(inv.memory_error) + '</span>' : 'Healthy'}</small>
+        <div class="metric-label">Hindsight Continuous Memory Status</div>
+        <div class="metric-value">${memoryStatusText}</div>
+        <small style="color:var(--text-muted)">${inv.memory_error ? esc(inv.memory_error) : (memories.length ? 'Prior incident knowledge applied' : 'No memory match')}</small>
       </div>
     </div>
 
@@ -557,38 +715,48 @@ function renderIncidentDetail(inc) {
     <div class="memory-box">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <strong style="color:#d8b4fe;display:flex;align-items:center;gap:6px">
-          <span>🧠</span> Hindsight Historical Ground Truth (Recalled from Prior Verified Incidents)
+          <span>🧠</span> Hindsight Retrieved Memories (Historical Context; Verification Varies)
         </strong>
-        <span class="memory-tag">${memories.length} Memorie(s) Recalled</span>
+        <span class="memory-tag">${memories.length} Item(s) Recalled</span>
       </div>
       <div style="font-size:11px;color:#cbd5e1;margin-top:4px">
-        Continuous memory bank recalls verified root causes and approved runbooks across restarts and incidents.
+        Retrieved memories provide historical context. Each record must be independently checked before treating it as verified evidence or an approved runbook.
       </div>
       ${memories.length ? memories.map((m, idx) => `
         <div class="memory-item">
           <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
-            <span class="memory-tag">Memory #${idx}</span>
-            <small style="color:var(--text-muted)">Historical Evidence</small>
+            <span class="memory-tag">Historical Memory #${idx}</span>
+            <small style="color:var(--text-muted)">Retrieved memory · verification status not established</small>
           </div>
           <div style="font-size:12px;color:#f1f5f9">${esc(m)}</div>
         </div>
       `).join('') : `
         <div style="padding:10px 0;color:var(--text-muted);font-size:12px">
-          ${inv.memory_error ? `<span style="color:var(--red)">Recall error: ${esc(inv.memory_error)}</span>` : 'No prior similar verified incidents in memory bank yet.'}
+          ${inv.memory_error ? `<span style="color:var(--red)">Recall notice: ${esc(inv.memory_error)}</span>` : 'No prior similar verified incidents in memory bank yet. (Investigation based on current evidence only).'}
         </div>
       `}
     </div>
 
-    <!-- Section 2: AI Investigation & Validated Hypotheses (Groq) -->
+    <!-- Section 2: AI Root-Cause Investigation (Groq) -->
     <div class="section">
-      <div class="section-title"><span>🤖</span> AI Root-Cause Investigation & Anti-Fabrication Validation</div>
+      <div class="section-title"><span>🤖</span> AI Causal Investigation & Anti-Fabrication Validation</div>
       ${inv.summary ? `
         <div style="background:var(--surface-raised);border-left:3px solid var(--accent);padding:10px 14px;border-radius:4px;margin-bottom:12px">
-          <strong>Summary:</strong> ${esc(inv.summary)}
+          <strong>${pm.root_cause?.status === 'operator_attested' ? 'Original AI investigation summary (UNCONFIRMED; not the saved root-cause finding):' : 'AI investigation summary (unconfirmed):'}</strong> ${esc(inv.summary)}
         </div>
       ` : '<p style="color:var(--text-muted)">Click "Run Investigation" above to perform causal reasoning with Groq and Hindsight.</p>'}
 
+      ${pm.root_cause?.status === 'operator_attested' ? `
+        <div style="background:var(--surface-raised);border:1px solid #d97706;border-left:4px solid #d97706;border-radius:6px;padding:12px;margin-bottom:12px">
+          <strong>Operator-attested configuration finding — NOT independently confirmed</strong>
+          <p style="margin:6px 0">${esc(pm.root_cause.text)}</p>
+          <small>Causal confirmation: ${inc.causal_evidence?.verified === true ? 'independently verified' : 'NOT established'}</small>
+        </div>
+      ` : ''}
       ${hyp.length ? `
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">
+          AI-generated investigation hypotheses — unconfirmed leads, not established root causes.
+        </div>
         <div class="grid-2">
           ${hyp.map(h => `
             <div class="hypothesis-card">
@@ -602,8 +770,8 @@ function renderIncidentDetail(inc) {
               <div style="font-size:11px;color:var(--text-muted)">
                 Supporting Event IDs: ${esc((h.supporting_event_ids||[]).join(', ') || 'None')}
               </div>
-              <div style="font-size:10px;color:var(--green);margin-top:4px">
-                ✓ Validated against candidate evidence (Status: hypothesis_only)
+              <div style="font-size:10px;color:var(--text-muted);margin-top:4px">
+                Unconfirmed hypothesis · candidate evidence only · not a verified root cause
               </div>
             </div>
           `).join('')}
@@ -612,7 +780,7 @@ function renderIncidentDetail(inc) {
 
       ${inv.dropped_hypotheses?.length ? `
         <div style="margin-top:8px;font-size:11px;color:var(--red)">
-          <strong>Dropped Hypotheses (Anti-Fabrication):</strong>
+          <strong>Dropped Hypotheses (Anti-Fabrication Enforcement):</strong>
           ${inv.dropped_hypotheses.map(d => `${esc(d.cause)} (${esc(d.why)})`).join('; ')}
         </div>
       ` : ''}
@@ -628,8 +796,8 @@ function renderIncidentDetail(inc) {
             <div style="display:flex;gap:6px;align-items:center">
               <span class="pill ${r.priority==='high'?'sev-1':(r.priority==='medium'?'sev-2':'sev-4')}">${esc(r.priority || 'medium')} Priority</span>
               ${r.historical_memory_index !== null && r.historical_memory_index !== undefined ? `
-                <span class="memory-tag">Cites Recalled Memory #${r.historical_memory_index}</span>
-              ` : ''}
+                <span class="memory-tag">🧠 Cites Historical Memory #${r.historical_memory_index}</span>
+              ` : '<span class="pill" style="background:#1e293b;color:var(--text-muted)">🤖 Generative AI</span>'}
             </div>
           </div>
           <p style="margin:4px 0 8px;font-size:12px;color:#cbd5e1">${esc(r.reason)}</p>
@@ -639,10 +807,14 @@ function renderIncidentDetail(inc) {
 
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
             <label style="font-size:11px;color:var(--text-muted)">Target Adapter:</label>
-            <select id="adapterSelect_${idx}">
-              ${adapters.map(ad => `<option value="${esc(ad.name)}">${esc(ad.name)} ${ad.simulated?'(simulated)':''}</option>`).join('')}
-            </select>
-            <button class="btn-primary" onclick="requestRemediation('${esc(inc.id)}', ${idx})">Request Approval</button>
+            ${adapters.length ? `
+              <select id="adapterSelect_${idx}">
+                ${adapters.map(ad => `<option value="${esc(ad.name)}">${esc(ad.name)} ${ad.simulated?'(simulated)':''}</option>`).join('')}
+              </select>
+            ` : '<span style="color:var(--red);font-size:11px">No adapters available — registry unavailable or empty. Remediation disabled.</span>'}
+            <button class="btn-primary" data-action="request-remediation" data-rec-index="${idx}" ${isViewer || !adapters.length ? 'disabled title="Requires an available registered adapter and an authorized role"' : ''}>
+              Request Approval
+            </button>
           </div>
         </div>
       `).join('') : '<p style="color:var(--text-muted)">No recommendations available. Run investigation first.</p>'}
@@ -650,11 +822,11 @@ function renderIncidentDetail(inc) {
       <!-- Approvals and Execution Status -->
       ${approvals.length ? `
         <div style="margin-top:14px">
-          <strong>Approval Requests & Audit Trail:</strong>
+          <strong>Remediation Approval Requests & Audit Trail:</strong>
           <div style="margin-top:8px">
             ${approvals.map(req => `
               <div style="background:var(--surface-raised);border:1px solid var(--surface-border);border-radius:6px;padding:10px 14px;margin-bottom:8px">
-                <div style="display:flex;justify-content:space-between;align-items:center">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
                   <div>
                     <strong>Action: ${esc(req.action)}</strong> (adapter: <code>${esc(req.adapter||'default')}</code>)
                     <span class="pill state-${esc(req.state||'pending')}">${esc(req.state||'pending')}</span>
@@ -662,11 +834,11 @@ function renderIncidentDetail(inc) {
                   </div>
                   <div class="toolbar">
                     ${req.state === 'pending' ? `
-                      <button class="btn-success" onclick="decideApproval('${esc(req.id)}', true)">Approve (SRE)</button>
-                      <button class="btn-danger" onclick="decideApproval('${esc(req.id)}', false)">Reject</button>
+                      <button class="btn-success" data-action="approve" data-request-id="${esc(req.id)}" ${isViewer ? 'disabled' : ''}>Approve</button>
+                      <button class="btn-danger" data-action="reject" data-request-id="${esc(req.id)}" ${isViewer ? 'disabled' : ''}>Reject</button>
                     ` : ''}
                     ${req.state === 'approved' ? `
-                      <button class="btn-primary" onclick="executeRemediation('${esc(req.id)}')">Execute Remediation</button>
+                      <button class="btn-primary" data-action="execute" data-request-id="${esc(req.id)}" ${isViewer ? 'disabled' : ''}>Execute Remediation</button>
                     ` : ''}
                   </div>
                 </div>
@@ -680,22 +852,22 @@ function renderIncidentDetail(inc) {
 
     <!-- Section 4: Recovery Verification & Post-Mortem Retention -->
     <div class="section">
-      <div class="section-title"><span>📊</span> Recovery Verification & Post-Mortem Retention</div>
+      <div class="section-title"><span>📊</span> Telemetry Recovery Verification & Post-Mortem Retention</div>
       <div class="grid-2">
         <div class="metric-box">
-          <div class="metric-label">Recovery Verification Criteria</div>
+          <div class="metric-label">Recovery Verification Status</div>
           <div class="metric-value">${ver.resolved ? '<span style="color:var(--green)">✓ Resolved</span>' : '<span style="color:var(--amber)">Pending / Unresolved</span>'}</div>
-          <small style="color:var(--text-muted)">Reason: ${esc(ver.reason || 'Not yet verified')}</small>
+          <small style="color:var(--text-muted)">Telemetry: ${esc(ver.reason || 'Not verified. Needs an executed real remediation and a bound monitoring source.')}${ver.evidence ? ' · source: ' + esc(ver.evidence.source) + ' · services: ' + esc((ver.evidence.services || []).join(', ')) : ''}</small>
         </div>
         <div class="metric-box">
           <div class="metric-label">Hindsight Memory Retention</div>
-          <div class="metric-value">${pm.retain_to_hindsight ? '<span style="color:var(--green)">✓ Retained to Hindsight</span>' : '<span style="color:var(--text-muted)">Gated (requires verified recovery)</span>'}</div>
+          <div class="metric-value">${(() => { const r = inc.memory_retention; if (!r) return '<span style="color:var(--text-muted)">Not yet attempted</span>'; if (r.status === 'retained') return `<span style="color:var(--green)">✓ Retained (${esc(r.kind)})</span>`; if (r.status === 'failed') return `<span style="color:var(--red)">✗ Retention FAILED: ${esc(r.error)}</span>`; return `<span style="color:var(--text-muted)">Not retained: ${esc(r.reason)}</span>`; })()}</div>
           <small style="color:var(--text-muted)">Root cause status: <strong>${esc(pm.root_cause?.status || 'unverified_hypothesis')}</strong></small>
         </div>
       </div>
       ${pm.root_cause ? `
         <div style="margin-top:12px;background:var(--surface-raised);border:1px solid var(--surface-border);border-radius:6px;padding:12px">
-          <strong>Confirmed Root Cause:</strong> ${esc(pm.root_cause.text)}<br>
+          <strong>${pm.root_cause.status === 'confirmed' ? 'Confirmed root cause' : (pm.root_cause.status === 'operator_attested' ? 'Operator-attested finding (NOT confirmed)' : 'Hypothesis (NOT confirmed)')}:</strong> ${esc(pm.root_cause.text)}<br>
           <small style="color:var(--text-muted)">Status: ${esc(pm.root_cause.status)} · Resolutions executed: ${esc((pm.resolution||[]).map(r=>r.action).join(', ')||'None')}</small>
         </div>
       ` : ''}
@@ -715,12 +887,43 @@ function renderIncidentDetail(inc) {
       </div>
     </div>
   `;
+
+  // Attach delegated event listeners to the workspace
+  p.onclick = async e => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    const action = target.getAttribute('data-action');
+
+    if (action === 'investigate') {
+      await runInvestigation(inc.id);
+    } else if (action === 'verify') {
+      await runVerification(inc.id);
+    } else if (action === 'request-remediation') {
+      const idx = parseInt(target.getAttribute('data-rec-index'), 10);
+      const select = $(`adapterSelect_${idx}`);
+      if (!select || !select.value) {
+        alert('No registered remediation adapter is available. No approval request was submitted.');
+        return;
+      }
+      const adName = select.value;
+      await requestRemediation(inc.id, idx, adName);
+    } else if (action === 'approve') {
+      const rid = target.getAttribute('data-request-id');
+      await decideApproval(rid, true);
+    } else if (action === 'reject') {
+      const rid = target.getAttribute('data-request-id');
+      await decideApproval(rid, false);
+    } else if (action === 'execute') {
+      const rid = target.getAttribute('data-request-id');
+      await executeRemediation(rid);
+    }
+  };
 }
 
 async function refresh() {
   try {
     incidents = await api('/incidents');
-    $('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    $('updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
     renderIncidentList();
     if (selectedId && incidents.some(x => x.id === selectedId)) {
       const refreshed = await api(`/incidents/${encodeURIComponent(selectedId)}`);
@@ -728,29 +931,27 @@ async function refresh() {
     } else if (incidents.length && !selectedId) {
       selectIncident(incidents[0].id);
     }
-    updateProviders();
+    await updateProviders();
   } catch (err) {
-    $('lastUpdated').textContent = 'Refresh failed';
-    $('incidentsContainer').innerHTML = `<div class="empty-state" style="color:var(--red)">${esc(err.message)}</div>`;
+    $('updated').textContent = 'Refresh failed';
+    $('incidents').innerHTML = `<div class="empty" style="color:var(--red)">${esc(err.message)}</div>`;
   }
 }
 
 async function runInvestigation(iid) {
-  const btn = $('investigateBtn');
+  const btn = $('investigate');
   if (btn) { btn.disabled = true; btn.textContent = 'Investigating...'; }
   try {
     await api(`/incidents/${encodeURIComponent(iid)}/investigate?use_memory=true`, { method: 'POST' });
     await refresh();
   } catch (err) {
-    alert('Investigation error: ' + err.message);
+    alert('Investigation failed: ' + err.message);
   } finally {
     if (btn) btn.disabled = false;
   }
 }
 
-async function requestRemediation(iid, recIndex) {
-  const select = $(`adapterSelect_${recIndex}`);
-  const adapter = select ? select.value : 'demo-noop';
+async function requestRemediation(iid, recIndex, adapter) {
   try {
     await api(`/incidents/${encodeURIComponent(iid)}/remediations`, {
       method: 'POST',
@@ -772,7 +973,7 @@ async function decideApproval(rid, approve) {
     });
     await refresh();
   } catch (err) {
-    alert('Decision error: ' + err.message);
+    alert('Approval decision error: ' + err.message);
   }
 }
 
@@ -782,21 +983,22 @@ async function executeRemediation(rid) {
     await api(`/approvals/${encodeURIComponent(rid)}/execute`, { method: 'POST' });
     await refresh();
   } catch (err) {
-    alert('Execution error: ' + err.message);
+    alert('Remediation execution error: ' + err.message);
   }
 }
 
 async function runVerification(iid) {
   try {
     const res = await api(`/incidents/${encodeURIComponent(iid)}/verify`, { method: 'POST' });
-    alert('Recovery verification completed: ' + (res.postmortem?.verification?.reason || 'Done'));
+    alert('Recovery verification: ' + (res.postmortem?.verification?.resolved ? 'RESOLVED' : 'NOT resolved') + ' (' + (res.postmortem?.verification?.reason || '') + '). Memory retention: ' + (res.memory_retention?.status || 'n/a') + (res.memory_retention?.error ? ' - ' + res.memory_retention.error : ''));
     await refresh();
   } catch (err) {
-    alert('Verification error: ' + err.message);
+    alert('Recovery verification error: ' + err.message);
   }
 }
 
 async function injectDemo() {
+  if (!confirm('This adds a SYNTHETIC fixture incident (clearly labelled, never retained to Hindsight). Continue?')) return;
   const btn = $('demoBtn');
   btn.disabled = true;
   try {
@@ -808,8 +1010,8 @@ async function injectDemo() {
           environment: "prod",
           severity: "critical",
           source: "db-monitor",
-          message: "database connection pool exhausted: 100/100 connections active, 48 waiting",
-          metadata: { pool_size: 100, waiting: 48, users_affected: 2500 }
+          message: "[SYNTHETIC FIXTURE] database connection pool exhausted: 100/100 connections active, 48 waiting",
+          metadata: { synthetic_fixture: true, pool_size: 100, waiting: 48, users_affected: 2500 }
         },
         {
           timestamp: new Date().toISOString(),
@@ -817,8 +1019,8 @@ async function injectDemo() {
           environment: "prod",
           severity: "error",
           source: "app-server",
-          message: "checkout payment failed: connection acquisition timeout after 5000ms",
-          metadata: { error_code: "PG_ACQUIRE_TIMEOUT" }
+          message: "[SYNTHETIC FIXTURE] checkout payment failed: connection acquisition timeout after 5000ms",
+          metadata: { synthetic_fixture: true, error_code: "PG_ACQUIRE_TIMEOUT" }
         },
         {
           timestamp: new Date().toISOString(),
@@ -826,42 +1028,43 @@ async function injectDemo() {
           environment: "prod",
           severity: "warning",
           source: "api-gateway",
-          message: "checkout response latency spike: p99 exceeds 4800ms on /pay endpoint",
-          metadata: { p99_latency_ms: 4800 }
+          message: "[SYNTHETIC FIXTURE] checkout response latency spike: p99 exceeds 4800ms on /pay endpoint",
+          metadata: { synthetic_fixture: true, p99_latency_ms: 4800 }
         }
       ]
     };
     const res = await api('/events', { method: 'POST', body: JSON.stringify(demoPayload) });
-    alert('Demo incident ingested successfully: ' + (res.incident_ids || []).join(', '));
+    alert('Demo incident ingested: ' + (res.incident_ids || []).join(', '));
     await refresh();
     if (res.incident_ids?.length) {
       selectIncident(res.incident_ids[0]);
     }
   } catch (err) {
-    alert('Failed to inject demo: ' + err.message);
+    alert('Failed to inject demo incident: ' + err.message);
   } finally {
     btn.disabled = false;
   }
 }
 
-$('connectBtn').onclick = async () => {
+// Event Listeners for Toolbar
+$('connect').addEventListener('click', async () => {
   key = $('apiKey').value.trim();
-  if (!key) { alert('Enter an API key.'); return; }
+  if (!key) { alert('Enter your API key.'); return; }
   try {
     await updateProviders();
     await loadAdapters();
     await refresh();
-    $('refreshBtn').disabled = false;
+    $('refresh').disabled = false;
     if (refreshInterval) clearInterval(refreshInterval);
     refreshInterval = setInterval(refresh, 6000);
   } catch (err) {
     alert('Connection failed: ' + err.message);
   }
-};
+});
 
-$('refreshBtn').onclick = refresh;
-$('demoBtn').onclick = injectDemo;
-$('filterInput').oninput = renderIncidentList;
+$('refresh').addEventListener('click', refresh);
+$('demoBtn').addEventListener('click', injectDemo);
+$('filterInput').addEventListener('input', renderIncidentList);
 
 // Initial provider status check
 updateProviders();

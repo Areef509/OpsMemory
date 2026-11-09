@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 5s
+  evaluation_interval: 5s
+
+scrape_configs:
+  - job_name: opsmemory-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["backend:8000"]
+
+  - job_name: opsmemory-canary
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["canary:8081"]
+
+
+  - job_name: payment-gateway-test
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["gateway:8082"]

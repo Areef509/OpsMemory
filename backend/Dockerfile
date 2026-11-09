@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 WORKDIR /app
 COPY backend/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt && useradd -m app
+RUN apt-get update && apt-get install -y --no-install-recommends zlib1g && rm -rf /var/lib/apt/lists/* && pip install --no-cache-dir -r requirements.txt && useradd -m app
 COPY backend/app ./app
 COPY frontend ./frontend
 ENV FRONTEND_DIR=/app/frontend

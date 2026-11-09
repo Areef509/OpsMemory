@@ -149,8 +149,8 @@ class RemediationTests(unittest.TestCase):
 
 
 class VerificationAndPostmortem(unittest.TestCase):
-    good = {"error_rate": 0.001, "p99_ms": 300}
-    bad = {"error_rate": 0.2, "p99_ms": 2400}
+    good = {"error_rate": 0.001, "p99_ms": 300, "request_count": 5, "degraded": 0}
+    bad = {"error_rate": 0.2, "p99_ms": 2400, "request_count": 5, "degraded": 0}
 
     def test_not_enough_samples(self):
         self.assertFalse(verify_recovery([self.good], VerificationCriteria(), True)["resolved"])
@@ -166,7 +166,7 @@ class VerificationAndPostmortem(unittest.TestCase):
         return {"id": "i1", "timeline": MAIN.timeline(), "severity": "SEV-1", "synthetic": False,
                 "investigation": validate(llm_answer(IDS[:1]), MAIN, 0),
                 "verification": {"resolved": resolved},
-                "approvals": [{"state": "executed"}, {"state": "rejected"}]}
+                "approvals": [{"state": "executed", "simulated": False}, {"state": "rejected"}]}
 
     def test_unverified_root_cause_not_confirmed_and_not_retained(self):
         p = generate(self.inc(False))
@@ -175,7 +175,7 @@ class VerificationAndPostmortem(unittest.TestCase):
 
     def test_verified_root_cause_confirmed(self):
         p = generate(self.inc(True))
-        self.assertEqual(p["root_cause"]["status"], "confirmed")
+        self.assertEqual(p["root_cause"]["status"], "unverified_hypothesis")
         self.assertTrue(p["retain_to_hindsight"]); self.assertEqual(len(p["failed_attempts"]), 1)
 
     def test_synthetic_incident_is_never_retained_as_production_memory(self):

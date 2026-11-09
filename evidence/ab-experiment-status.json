@@ -1,0 +1,6 @@
+{
+  "status": "FAILED",
+  "reason": "Groq provider unreachable or returned an error",
+  "timestamp": "2026-11-09T15:12:56Z",
+  "detail": "LLMError: gave up after 4 attempts (network/timeout: <urlopen error [Errno 11001] getaddrinfo failed>)"
+}

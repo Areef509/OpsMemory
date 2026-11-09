@@ -16,6 +16,46 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+  prometheus:
+    image: prom/prometheus@sha256:e04987641b57704f408e31f6373ba4138ecf27cb4a165d24aabb6c38fddd0f06
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+  canary:
+    image: python:3.12-slim
+    restart: unless-stopped
+    environment:
+      CANARY_START_DEGRADED: "true"
+      CANARY_REMEDIATION_TOKEN: ${CANARY_REMEDIATION_TOKEN:?Set CANARY_REMEDIATION_TOKEN in .env}
+    command: ["python", "/app/app.py"]
+    volumes:
+      - ./canary:/app:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8081/state', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  gateway:
+    image: python:3.12-slim
+    restart: unless-stopped
+    environment:
+      GATEWAY_START_DEGRADED: "true"
+      GATEWAY_REMEDIATION_TOKEN: ${GATEWAY_REMEDIATION_TOKEN:?Set GATEWAY_REMEDIATION_TOKEN in .env}
+    command: ["python", "/app/app.py"]
+    volumes:
+      - ./gateway:/app:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8082/state', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   backend:
     build:
       context: .
@@ -23,11 +63,24 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@db:5432/opsmemory
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in .env}
+      PROMETHEUS_BASE_URL: http://prometheus:9090
+      CANARY_BASE_URL: http://canary:8081
+      CANARY_REMEDIATION_TOKEN: ${CANARY_REMEDIATION_TOKEN:?Set CANARY_REMEDIATION_TOKEN in .env}
+      GATEWAY_BASE_URL: http://gateway:8082
+      GATEWAY_REMEDIATION_TOKEN: ${GATEWAY_REMEDIATION_TOKEN:?Set GATEWAY_REMEDIATION_TOKEN in .env}
+      OPSMEMORY_USE_ADAPTER_REGISTRY: "true"
     depends_on:
       db:
         condition: service_healthy
+      canary:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
+    volumes:
+      - ./frontend:/app/frontend:ro
 volumes:
   pgdata:
+  promdata:

@@ -1,0 +1,119 @@
+test_auth_failure_lockout (tests.unit.test_api_session5.Session5Api.test_auth_failure_lockout) ... skipped 'fastapi not installed'
+test_general_rate_limit (tests.unit.test_api_session5.Session5Api.test_general_rate_limit) ... skipped 'fastapi not installed'
+test_headers (tests.unit.test_api_session5.Session5Api.test_headers) ... skipped 'fastapi not installed'
+test_me_reports_role (tests.unit.test_api_session5.Session5Api.test_me_reports_role) ... skipped 'fastapi not installed'
+test_non_ascii_key_is_401_not_500 (tests.unit.test_api_session5.Session5Api.test_non_ascii_key_is_401_not_500) ... skipped 'fastapi not installed'
+test_verify_requires_admin_not_sre (tests.unit.test_api_session5.Session5Api.test_verify_requires_admin_not_sre) ... skipped 'fastapi not installed'
+test_viewer_cannot_call_live_provider_diagnostics (tests.unit.test_api_session5.Session5Api.test_viewer_cannot_call_live_provider_diagnostics) ... skipped 'fastapi not installed'
+test_wildcard_cors_not_enabled (tests.unit.test_api_session5.Session5Api.test_wildcard_cors_not_enabled) ... skipped 'fastapi not installed'
+test_demo_groups_into_incident_plus_unrelated (tests.unit.test_core.CorrelationTests.test_demo_groups_into_incident_plus_unrelated) ... ok
+test_dependency_required_for_cross_service_link (tests.unit.test_core.CorrelationTests.test_dependency_required_for_cross_service_link) ... ok
+test_environment_isolation (tests.unit.test_core.CorrelationTests.test_environment_isolation) ... ok
+test_repeated_signature_detected (tests.unit.test_core.CorrelationTests.test_repeated_signature_detected) ... ok
+test_bad_severity_and_timestamp (tests.unit.test_core.IngestTests.test_bad_severity_and_timestamp) ... ok
+test_excessive_length_rejected (tests.unit.test_core.IngestTests.test_excessive_length_rejected) ... ok
+test_idempotent (tests.unit.test_core.IngestTests.test_idempotent) ... ok
+test_missing_fields_rejected (tests.unit.test_core.IngestTests.test_missing_fields_rejected) ... ok
+test_redaction (tests.unit.test_core.IngestTests.test_redaction) ... ok
+test_payment_incident_is_sev1_with_explanation (tests.unit.test_core.SeverityTests.test_payment_incident_is_sev1_with_explanation) ... ok
+test_unrelated_low_signal_is_sev3_or_lower_and_lists_unknowns (tests.unit.test_core.SeverityTests.test_unrelated_low_signal_is_sev3_or_lower_and_lists_unknowns) ... ok
+test_full_cycle_and_memory_flows_into_next_investigation (tests.unit.test_engine.Lifecycle.test_full_cycle_and_memory_flows_into_next_investigation) ... ok
+test_memory_outage_is_reported_not_hidden (tests.unit.test_engine.Lifecycle.test_memory_outage_is_reported_not_hidden) ... ok
+test_unregistered_adapter_refused (tests.unit.test_engine.Lifecycle.test_unregistered_adapter_refused) ... ok
+test_unverified_recovery_not_retained (tests.unit.test_engine.Lifecycle.test_unverified_recovery_not_retained) ... ok
+test_benign_not_flagged (tests.unit.test_engine.Safety.test_benign_not_flagged) ... ok
+test_injection_flagged_and_control_chars_stripped (tests.unit.test_engine.Safety.test_injection_flagged_and_control_chars_stripped) ... ok
+test_gives_up_after_retries (tests.unit.test_pipeline.GroqClientStubTests.test_gives_up_after_retries) ... ok
+test_missing_key (tests.unit.test_pipeline.GroqClientStubTests.test_missing_key) ... ok
+test_non_retryable_fails_fast (tests.unit.test_pipeline.GroqClientStubTests.test_non_retryable_fails_fast) ... ok
+test_retries_transient_then_succeeds (tests.unit.test_pipeline.GroqClientStubTests.test_retries_transient_then_succeeds) ... ok
+test_success_with_auth_header_and_model_reported (tests.unit.test_pipeline.GroqClientStubTests.test_success_with_auth_header_and_model_reported) ... ok
+test_unreachable_provider (tests.unit.test_pipeline.GroqClientStubTests.test_unreachable_provider) ... ok
+test_fabricated_event_id_dropped (tests.unit.test_pipeline.InvestigationValidation.test_fabricated_event_id_dropped) ... ok
+test_invalid_memory_reference_removed (tests.unit.test_pipeline.InvestigationValidation.test_invalid_memory_reference_removed) ... ok
+test_missing_key_rejected (tests.unit.test_pipeline.InvestigationValidation.test_missing_key_rejected) ... ok
+test_no_evidence_dropped (tests.unit.test_pipeline.InvestigationValidation.test_no_evidence_dropped) ... ok
+test_valid_hypothesis_kept_status_never_confirmed (tests.unit.test_pipeline.InvestigationValidation.test_valid_hypothesis_kept_status_never_confirmed) ... ok
+test_cannot_execute_unapproved_or_rejected (tests.unit.test_pipeline.RemediationTests.test_cannot_execute_unapproved_or_rejected) ... ok
+test_double_decision_blocked (tests.unit.test_pipeline.RemediationTests.test_double_decision_blocked) ... ok
+test_execute_labels_simulated (tests.unit.test_pipeline.RemediationTests.test_execute_labels_simulated) ... ok
+test_failed_execution_recorded_not_success (tests.unit.test_pipeline.RemediationTests.test_failed_execution_recorded_not_success) ... ok
+test_viewer_cannot_approve_and_is_audited (tests.unit.test_pipeline.RemediationTests.test_viewer_cannot_approve_and_is_audited) ... ok
+test_not_enough_samples (tests.unit.test_pipeline.VerificationAndPostmortem.test_not_enough_samples) ... ok
+test_stable_recovery_resolved_and_synthetic_flag_kept (tests.unit.test_pipeline.VerificationAndPostmortem.test_stable_recovery_resolved_and_synthetic_flag_kept) ... ok
+test_synthetic_incident_is_never_retained_as_production_memory (tests.unit.test_pipeline.VerificationAndPostmortem.test_synthetic_incident_is_never_retained_as_production_memory) ... ok
+test_unstable_recovery_rejected (tests.unit.test_pipeline.VerificationAndPostmortem.test_unstable_recovery_rejected) ... ok
+test_unverified_root_cause_not_confirmed_and_not_retained (tests.unit.test_pipeline.VerificationAndPostmortem.test_unverified_root_cause_not_confirmed_and_not_retained) ... ok
+test_verified_root_cause_confirmed (tests.unit.test_pipeline.VerificationAndPostmortem.test_verified_root_cause_confirmed) ... ok
+test_exact_fixture_recalled_requires_exact_doc_id (tests.unit.test_providers_integration.ABExperimentRegressionTests.test_exact_fixture_recalled_requires_exact_doc_id) ... ok
+test_scenario_hash_deterministic (tests.unit.test_providers_integration.ABExperimentRegressionTests.test_scenario_hash_deterministic) ... ok
+test_validate_config_detects_missing_keys (tests.unit.test_providers_integration.ABExperimentRegressionTests.test_validate_config_detects_missing_keys) ... ok
+test_groq_check_connection_failure_reported_safely (tests.unit.test_providers_integration.GroqDiagnosticsTests.test_groq_check_connection_failure_reported_safely) ... ok
+test_groq_check_connection_success (tests.unit.test_providers_integration.GroqDiagnosticsTests.test_groq_check_connection_success) ... ok
+test_check_connection_failure_reported_safely (tests.unit.test_providers_integration.HindsightIntegrationUnitTests.test_check_connection_failure_reported_safely) ... ok
+test_check_connection_success (tests.unit.test_providers_integration.HindsightIntegrationUnitTests.test_check_connection_success) ... ok
+test_ensure_bank_exists_creates_when_not_found (tests.unit.test_providers_integration.HindsightIntegrationUnitTests.test_ensure_bank_exists_creates_when_not_found) ... ok
+test_missing_base_url_raises_hindsight_error (tests.unit.test_providers_integration.HindsightIntegrationUnitTests.test_missing_base_url_raises_hindsight_error) ... ok
+test_recall_similar_handles_none_results (tests.unit.test_providers_integration.HindsightIntegrationUnitTests.test_recall_similar_handles_none_results) ... ok
+test_recall_similar_handles_results_and_metadata (tests.unit.test_providers_integration.HindsightIntegrationUnitTests.test_recall_similar_handles_results_and_metadata) ... ok
+test_memory_recall_changes_recommendation (tests.unit.test_providers_integration.MemoryAblationWorkflowTests.test_memory_recall_changes_recommendation) ... ok
+test_json_markdown_extraction (tests.unit.test_providers_integration.ProviderSafetyAndSanitizationTests.test_json_markdown_extraction) ... ok
+test_json_reasoning_tag_stripping (tests.unit.test_providers_integration.ProviderSafetyAndSanitizationTests.test_json_reasoning_tag_stripping) ... ok
+test_plain_json_kept_intact (tests.unit.test_providers_integration.ProviderSafetyAndSanitizationTests.test_plain_json_kept_intact) ... ok
+test_secret_masking (tests.unit.test_providers_integration.ProviderSafetyAndSanitizationTests.test_secret_masking) ... ok
+test_dashboard_route_serves_html (tests.unit.test_runtime_hardening.ApiAuthorizationTests.test_dashboard_route_serves_html)
+GET / must return 200 with OpsMemory content. ... skipped 'Backend not reachable at http://localhost:8000 — skipping live API tests'
+test_ingest_requires_operator_or_admin (tests.unit.test_runtime_hardening.ApiAuthorizationTests.test_ingest_requires_operator_or_admin)
+POST /events without credentials must return 401. ... skipped 'Backend not reachable at http://localhost:8000 — skipping live API tests'
+test_security_headers_present (tests.unit.test_runtime_hardening.ApiAuthorizationTests.test_security_headers_present)
+Security headers must be present on all responses. ... skipped 'Backend not reachable at http://localhost:8000 — skipping live API tests'
+test_verify_requires_auth (tests.unit.test_runtime_hardening.ApiAuthorizationTests.test_verify_requires_auth)
+POST /incidents/<id>/verify without a valid API key must return 401 or 404. ... skipped 'Backend not reachable at http://localhost:8000 — skipping live API tests'
+test_viewer_cannot_ingest (tests.unit.test_runtime_hardening.ApiAuthorizationTests.test_viewer_cannot_ingest)
+A viewer-role API key must be rejected with 403 on POST /events. ... skipped 'Backend not reachable at http://localhost:8000 — skipping live API tests'
+test_new_engine_reloads_candidate_events_from_store (tests.unit.test_runtime_hardening.DurableProtocolRestart.test_new_engine_reloads_candidate_events_from_store) ... ok
+test_retrieved_memory_is_marked_and_sanitized_before_llm (tests.unit.test_runtime_hardening.MemoryPromptInjectionTests.test_retrieved_memory_is_marked_and_sanitized_before_llm) ... ok
+test_runtime_store_refuses_missing_database_url (tests.unit.test_runtime_hardening.PostgresConfigurationTests.test_runtime_store_refuses_missing_database_url) ... ok
+test_collects_server_side_samples_and_converts_seconds_to_ms (tests.unit.test_runtime_hardening.PrometheusVerifierTests.test_collects_server_side_samples_and_converts_seconds_to_ms) ... ok
+test_invalid_recovery_samples_fail_closed (tests.unit.test_runtime_hardening.PrometheusVerifierTests.test_invalid_recovery_samples_fail_closed) ... ok
+test_invalid_scheme_fails_closed (tests.unit.test_runtime_hardening.PrometheusVerifierTests.test_invalid_scheme_fails_closed) ... ok
+test_unconfigured_metrics_fails_closed (tests.unit.test_runtime_hardening.PrometheusVerifierTests.test_unconfigured_metrics_fails_closed) ... ok
+test_nested_metadata_and_raw_payload_are_redacted (tests.unit.test_runtime_hardening.RecursiveRedaction.test_nested_metadata_and_raw_payload_are_redacted) ... ok
+test_missing_config_is_nonzero (tests.unit.test_session5_gates.ABExperimentFailClosed.test_missing_config_is_nonzero) ... ======================================================================
+[BLOCKED — EXTERNAL DEPENDENCY] Missing required configuration in .env:
+  - GROQ_API_KEY
+  - HINDSIGHT_BASE_URL
+
+To run this genuine A/B experiment with real providers:
+  1. Configure GROQ_API_KEY and HINDSIGHT_BASE_URL in .env
+  2. Optionally configure HINDSIGHT_API_KEY and HINDSIGHT_EXPERIMENT_BANK_ID
+  3. Run: .\.venv\Scripts\python.exe .\scripts\run_ab_experiment.py
+======================================================================
+ok
+test_refuses_when_experiment_bank_equals_production_bank (tests.unit.test_session5_gates.ABExperimentFailClosed.test_refuses_when_experiment_bank_equals_production_bank) ... 
+[REFUSED] experiment bank equals the production bank; the experiment will never write fixtures into production memory
+ok
+test_empty_means_nothing_verifiable (tests.unit.test_session5_gates.Bindings.test_empty_means_nothing_verifiable) ... ok
+test_invalid_bindings_rejected (tests.unit.test_session5_gates.Bindings.test_invalid_bindings_rejected) ... ok
+test_stale_samples_rejected (tests.unit.test_session5_gates.Bindings.test_stale_samples_rejected) ... ok
+test_success_requires_matching_identity_and_postdating_window (tests.unit.test_session5_gates.Bindings.test_success_requires_matching_identity_and_postdating_window) ... ok
+test_unbound_service_fails_closed_and_names_it (tests.unit.test_session5_gates.Bindings.test_unbound_service_fails_closed_and_names_it) ... ok
+test_window_before_remediation_rejected (tests.unit.test_session5_gates.Bindings.test_window_before_remediation_rejected) ... ok
+test_wrong_service_labels_rejected (tests.unit.test_session5_gates.Bindings.test_wrong_service_labels_rejected) ... ok
+test_concurrent_execute_runs_adapter_once (tests.unit.test_session5_gates.ExecutionIdempotency.test_concurrent_execute_runs_adapter_once) ... ok
+test_duplicate_execute_rejected_and_adapter_runs_once (tests.unit.test_session5_gates.ExecutionIdempotency.test_duplicate_execute_rejected_and_adapter_runs_once) ... ok
+test_executed_entry_records_actor_and_time (tests.unit.test_session5_gates.ExecutionIdempotency.test_executed_entry_records_actor_and_time) ... ok
+test_extra_metadata_is_stringified_and_cannot_override_integrity_fields (tests.unit.test_session5_gates.HindsightMetadata.test_extra_metadata_is_stringified_and_cannot_override_integrity_fields) ... ok
+test_blocked_when_only_simulated_remediation (tests.unit.test_session5_gates.VerificationGate.test_blocked_when_only_simulated_remediation) ... ok
+test_blocked_without_any_executed_remediation (tests.unit.test_session5_gates.VerificationGate.test_blocked_without_any_executed_remediation) ... ok
+test_collector_gets_services_and_post_execution_since (tests.unit.test_session5_gates.VerificationGate.test_collector_gets_services_and_post_execution_since) ... ok
+test_failed_verification_retained_only_as_failed_attempt (tests.unit.test_session5_gates.VerificationGate.test_failed_verification_retained_only_as_failed_attempt) ... ok
+test_recovery_without_remediation_does_not_confirm_root_cause (tests.unit.test_session5_gates.VerificationGate.test_recovery_without_remediation_does_not_confirm_root_cause) ... ok
+test_retention_failure_visible_not_claimed (tests.unit.test_session5_gates.VerificationGate.test_retention_failure_visible_not_claimed) ... ok
+test_synthetic_incident_never_retained (tests.unit.test_session5_gates.VerificationGate.test_synthetic_incident_never_retained) ... ok
+test_verified_recovery_retained_with_structured_metadata (tests.unit.test_session5_gates.VerificationGate.test_verified_recovery_retained_with_structured_metadata) ... ok
+
+----------------------------------------------------------------------
+Ran 97 tests in 2.815s
+
+OK (skipped=13)

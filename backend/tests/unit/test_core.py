@@ -23,6 +23,12 @@ class IngestTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             normalize({**DEMO["events"][0], "timestamp": "yesterday"})
 
+    def test_excessive_length_rejected(self):
+        with self.assertRaisesRegex(ValidationError, "service name exceeds maximum length"):
+            normalize({**DEMO["events"][0], "service": "a" * 129})
+        with self.assertRaisesRegex(ValidationError, "message exceeds maximum length"):
+            normalize({**DEMO["events"][0], "message": "x" * 8193})
+
     def test_idempotent(self):
         seen = set()
         a, _ = ingest(DEMO["events"], seen)
